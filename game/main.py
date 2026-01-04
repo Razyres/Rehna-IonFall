@@ -2,23 +2,23 @@ import pygame
 
 pygame.init()
 
-screen = pygame.display.set_mode((400, 400))
+screen = pygame.display.set_mode((0, 0))
 clock = pygame.time.Clock()
 running = True
 x = 0
 y = 0
 
-image = pygame.image.load("ball.png").convert_alpha()
-image = pygame.transform.scale(image, (200, 200))
+image = pygame.image.load("ORD1NAT3UR_face.png").convert_alpha()
+image = pygame.transform.scale(image, (32, 48))
 
 while running :
     for event in pygame.event.get():
         if event.type == pygame.QUIT :
             running = False
     pressed = pygame.key.get_pressed()
-    if pressed[pygame.K_w]:
+    if pressed[pygame.K_z]:
         y -= 1
-    if pressed[pygame.K_a]:
+    if pressed[pygame.K_q]:
         x -= 1
     if pressed[pygame.K_s]:
         y += 1
