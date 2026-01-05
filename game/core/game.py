@@ -12,7 +12,7 @@ class Game :
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return "stop"
-            pressed = pygame.key.get_pressed()
+        pressed = pygame.key.get_pressed()
         if pressed[pygame.K_z]:
             return "z"
         if pressed[pygame.K_q]:
