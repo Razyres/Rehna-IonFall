@@ -1,6 +1,5 @@
 import pygame
-from ..entities.champion import Champion
-
+from game.entities.champion import Champion
 
 class Game :
     def __init__(self, screen, clock):
@@ -39,7 +38,7 @@ class Game :
         self.screen.fill((0, 0, 0))
         pygame.display.flip()
         for entity in self.entities:
-            entity.draw()
+            entity.draw(screen)
     
     def add_entity(self, entity):
         self.entities.append(entity)
@@ -59,7 +58,9 @@ pygame.init()
 screen = pygame.display.set_mode((500, 500))
 clock = pygame.time.Clock()
 game = Game(screen, clock)
-ORD1NAT3UR = Champion(10, 10, 10, 40, 32, )
+image = pygame.image.load("sprite/ORD1NAT3UR_face.png")
+ORD1NAT3UR = Champion(10, 10, 10, 40, 32, image)
+game.add_entity(ORD1NAT3UR)
 game.run()
 
 pygame.quit()
