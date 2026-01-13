@@ -22,4 +22,5 @@ class Champion(Entity):
             self.x += self.speed
     
     def draw(self, screen):
+        print("DRAW", self.x, self.y)
         screen.blit(self.sprite, (self.x, self.y))

@@ -23,22 +23,14 @@ class Game :
             return "d"
         
     def update(self, event):
-        if event == "z":
-            print("Haut")
-        if event == "q":
-            print("Left")
-        if event == "s":
-            print("Down")
-        if event == "d":
-            print("Right")
         for entity in self.entities:
             entity.update(event)
     
     def draw(self):
         self.screen.fill((0, 0, 0))
-        pygame.display.flip()
         for entity in self.entities:
-            entity.draw(screen)
+            entity.draw(self.screen)
+        pygame.display.flip()
     
     def add_entity(self, entity):
         self.entities.append(entity)
@@ -59,6 +51,7 @@ screen = pygame.display.set_mode((500, 500))
 clock = pygame.time.Clock()
 game = Game(screen, clock)
 image = pygame.image.load("sprite/ORD1NAT3UR_face.png")
+print(image)
 ORD1NAT3UR = Champion(10, 10, 10, 40, 32, image)
 game.add_entity(ORD1NAT3UR)
 game.run()
