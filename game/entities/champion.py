@@ -2,14 +2,22 @@ import pygame
 from .entity import Entity
 
 class Champion(Entity):
-    def __init__(self, x, y, speed, height, width, sprite):
-        super().__init__()
-        self.x = x
-        self.y = y
+    def __init__(self, x, y, speed, height, width, sprite, hp):
+        super().__init__(x, y, width, height, sprite)
         self.speed = speed
-        self.height = height
-        self.width = width
-        self.sprite = sprite
+        self.hp = hp
+        self.last_hit_time = 0
+        self.next_hit = 500
+    
+    def take_damage(self, damage):
+        if self.hp <= 0:
+            self.alive = False
+        else:
+            now = pygame.time.get_ticks()
+            if now - self.last_hit_time >= self.next_hit:
+                self.hp -= damage
+                self.last_hit_time = now
+                print("HP : ", self.hp)
     
     def update(self, event):
         if event == "z":
@@ -22,5 +30,4 @@ class Champion(Entity):
             self.x += self.speed
     
     def draw(self, screen):
-        print("DRAW", self.x, self.y)
         screen.blit(self.sprite, (self.x, self.y))
