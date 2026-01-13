@@ -14,7 +14,6 @@ body {
     padding: 00px;
     border-radius: 8px;
     margin: 20px;
-
     list-style: none;
 }
 
@@ -129,7 +128,7 @@ nav ul li a:visited{
 }
 
 nav ul li a:hover{
-    color: #f978f0;
+    color: #8e52a3;
 }
 
 nav ul li a:active{
