@@ -11,15 +11,14 @@ class Champion(Entity):
         self.width = width
         self.sprite = sprite
     
-    def update(self):
-        pressed = pygame.key.get_pressed()
-        if pressed[pygame.K_z]:
+    def update(self, event):
+        if event == "z":
             self.y -= self.speed
-        if pressed[pygame.K_q]:
+        if event == "q":
             self.x -= self.speed
-        if pressed[pygame.K_s]:
+        if event == "s":
             self.y += self.speed
-        if pressed[pygame.K_d]:
+        if event == "d":
             self.x += self.speed
     
     def draw(self, screen):
