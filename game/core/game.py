@@ -32,7 +32,7 @@ class Game :
         if event == "d":
             print("Right")
         for entity in self.entities:
-            entity.update()
+            entity.update(event)
     
     def draw(self):
         self.screen.fill((0, 0, 0))
