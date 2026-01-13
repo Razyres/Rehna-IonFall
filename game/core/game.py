@@ -1,4 +1,5 @@
 import pygame
+import pytmx
 import sys
 from pathlib import Path
 
