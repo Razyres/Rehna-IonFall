@@ -41,6 +41,8 @@ class Game :
                     self.player.take_damage(entity.damage)
         #Death
         self.entities = [e for e in self.entities if not hasattr(e, "alive") or e.alive]
+        if self.player.alive == False :
+            self.running = False
     
     def draw(self):
         self.screen.fill((0, 0, 0))
@@ -63,16 +65,17 @@ class Game :
 
 pygame.init()
 
-screen = pygame.display.set_mode((1000, 1000))
+screen = pygame.display.set_mode((1500, 1000))
 clock = pygame.time.Clock()
 game = Game(screen, clock)
 image = pygame.image.load("sprite/ORD1NAT3UR_face.png")
+image_pres = pygame.transform.scale(image, (400, 320))
 ORD1NAT3UR = Champion(10, 10, 10, 40, 32, image, 100)
 game.player = ORD1NAT3UR
 game.add_entity(ORD1NAT3UR)
 enemy_sprit = pygame.image.load("sprite/rick-astley.png")
-enemy_sprite = pygame.transform.scale(enemy_sprit, (45, 32))
-enemy = Enemy(100, 100, 45, 32, enemy_sprite, 40)
+enemy_sprite = pygame.transform.scale(enemy_sprit, (180, 140))
+enemy = Enemy(100, 100, 180, 140, enemy_sprite, 40)
 game.add_entity(enemy)
 game.run()
 
