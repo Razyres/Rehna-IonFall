@@ -1,5 +1,7 @@
 body {
-    background-color: rgb(127, 167, 241);
+    background-color: rgb(89, 149, 165);/*89, 149, 165*/
+    background-color: rgb(89, 149, 165);/*89, 149, 165*/
+    background-color: rgb(89, 149, 165);/*89, 149, 165*/
     color : white
 }
 .en_tete{
@@ -8,7 +10,7 @@ body {
     grid-auto-columns: 1fr;     /* 👈 chaque item = 1 fraction */
 
     align-items: center;
-    background-color: rgb(120, 160, 230);
+    background-color: rgb(97, 161, 173);/*89, 149, 165*/
     padding: 00px;
     border-radius: 8px;
     margin: 20px;
@@ -18,7 +20,7 @@ body {
 
 
 .en_bas{
-    background-color:rgb(120, 160, 230);
+    background-color:rgb(97, 161, 173);/*old color = 120, 160, 230*/
     padding: 20px;
     border-radius: 8px;
     margin: 20px;
@@ -26,7 +28,7 @@ body {
 }
 
 footer{
-    background-color: rgb(123, 140, 234);
+    background-color: rgb(111, 176, 189);/*123, 140, 234*/
 }
 .grille-personnes {
     display: grid;
@@ -78,14 +80,31 @@ footer{
     width: 60%;                  
 
 }
+.page {
+  position: relative; /* référence pour l’image */
+}
 
+.image_cote {
+  position: absolute;
+  left: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 200px;
+}
+
+.contenu {
+  display: flex;
+  flex-direction: column;
+  align-items: center;   /* centre horizontalement */
+  text-align: center;
+}
 
 #logo{
     display: block;
-    width: 180px;
+    width: 120px;
     height: 120px;
 
-    background-image: url("images/logo.webp");
+    background-image: url("images/IonFall_image.png");
     background-size: cover;
     background-repeat: no-repeat;
 
@@ -93,10 +112,26 @@ footer{
 }
 
 #logo:hover{
-	background-image: url("images/logo2.webp");
+	background-image: url("images/IonFall2_image.png");
 }
 
 .logo-item{
     margin-right: 20px;
 }
 
+nav ul li a{
+    color: #00FFF3;
+    text-decoration: none;
+}
+
+nav ul li a:visited{
+    color: #00FFF3;
+}
+
+nav ul li a:hover{
+    color: #f978f0;
+}
+
+nav ul li a:active{
+    color: #8e52a3;
+}
