@@ -15,6 +15,7 @@ current_dir = os.path.dirname(__file__)
 game_dir = os.path.dirname(current_dir)
 project_root = os.path.dirname(game_dir)
 map_path = os.path.join(project_root, "MAP", "map.tmx")
+
 class Game :
     def __init__(self, screen, clock):
         self.screen = screen
