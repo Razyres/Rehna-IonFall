@@ -76,12 +76,12 @@ class Game :
 
 pygame.init()
 
-screen = pygame.display.set_mode((1500, 1000))
+screen = pygame.display.set_mode((0, 0))
 clock = pygame.time.Clock()
 game = Game(screen, clock)
 image = pygame.image.load("sprite/ORD1NAT3UR_face.png")
 image_pres = pygame.transform.scale(image, (400, 320))
-ORD1NAT3UR = Champion(10, 10, 10, 40, 32, image, 100)
+ORD1NAT3UR = Champion(10, 10, 5, 40, 32, image, 100)
 game.player = ORD1NAT3UR
 game.add_entity(ORD1NAT3UR)
 enemy_sprit = pygame.image.load("sprite/rick-astley.png")
