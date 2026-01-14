@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <map version="1.10" tiledversion="1.11.2" orientation="orthogonal" renderorder="right-down" width="80" height="80" tilewidth="32" tileheight="32" infinite="0" nextlayerid="9" nextobjectid="23">
  <tileset firstgid="1" name="Base_paysage" tilewidth="32" tileheight="32" tilecount="480" columns="16">
-  <image source="C:/Users/nicol/Documents/test/test complet/MAP/pipo-map001_at.png" width="512" height="960"/>
+  <image source="pipo-map001_at.png" width="512" height="960"/>
  </tileset>
  <tileset firstgid="481" name="Chateaux" tilewidth="32" tileheight="32" tilecount="136" columns="8">
-  <image source="C:/Users/nicol/Documents/test/test complet/MAP/pipo-map001.png" width="256" height="544"/>
+  <image source="pipo-map001.png" width="256" height="544"/>
  </tileset>
  <tileset firstgid="617" name="demoA5" tilewidth="32" tileheight="32" tilecount="288" columns="12">
   <image source="C:/Users/nicol/Downloads/corpoTILESdemo/upscaled 16x16/demoA5.png" width="384" height="768"/>

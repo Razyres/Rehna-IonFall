@@ -9,7 +9,12 @@ sys.path.insert(0, str(root_dir))
 
 from game.entities.champion import Champion
 from game.entities.enemy import Enemy
-
+from game.world.map import GameMap
+import os
+current_dir = os.path.dirname(__file__)
+game_dir = os.path.dirname(current_dir)
+project_root = os.path.dirname(game_dir)
+map_path = os.path.join(project_root, "MAP", "map.tmx")
 class Game :
     def __init__(self, screen, clock):
         self.screen = screen
@@ -17,6 +22,9 @@ class Game :
         self.running = True
         self.entities = []
         self.player = None
+        self.game_map = GameMap(map_path)
+        self.camera_x = 0
+        self.camera_y = 0
     
     def handle_events(self):
         for event in pygame.event.get():
@@ -47,6 +55,7 @@ class Game :
     
     def draw(self):
         self.screen.fill((0, 0, 0))
+        self.game_map.draw(self.screen, (self.camera_x, self.camera_y))
         for entity in self.entities:
             entity.draw(self.screen)
         pygame.display.flip()
