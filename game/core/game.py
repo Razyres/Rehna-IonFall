@@ -76,7 +76,7 @@ class Game :
 
 pygame.init()
 
-screen = pygame.display.set_mode((0, 0))
+screen = pygame.display.set_mode((1000, 1000))
 clock = pygame.time.Clock()
 game = Game(screen, clock)
 image = pygame.image.load("sprite/ORD1NAT3UR_face.png")
