@@ -10,6 +10,7 @@ class Camera():
         self.y = 0
         self.zoom = 1.5
         self.target_zoom = 1.5
+        self.zoom_speed = 0.1
         self.smoothing = 0.1
         
     def follow(self, target_rect):
@@ -28,5 +29,15 @@ class Camera():
             self.height * self.zoom
         )
     
-    def apply_():
-        pass
+    def apply_position(self, x, y):
+        return (
+            (x - self.x) * self.zoom,
+            (y - self.y) * self.zoom
+        )
+    
+    def update_zoom(self):
+        if abs(self.zoom - self.target_zoom) > 0.01:
+            self.zoom += (self.target_zoom - self.zoom) * self.zoom_speed
+    
+    def set_zoom(self, zoom_level):
+        self.target_zoom = max(2.0, min(zoom_level, 3,0))
