@@ -40,4 +40,4 @@ class Camera():
             self.zoom += (self.target_zoom - self.zoom) * self.zoom_speed
     
     def set_zoom(self, zoom_level):
-        self.target_zoom = max(2.0, min(zoom_level, 3,0))
+        self.target_zoom = max(1.5, min(zoom_level, 3,0))
