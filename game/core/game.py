@@ -94,7 +94,7 @@ game.player = ORD1NAT3UR
 game.add_entity(ORD1NAT3UR)
 enemy = pygame.image.load("sprite/rick-astley.png")
 enemy_sprite = pygame.transform.scale(enemy, (104, 188))
-enemy = Enemy(400, 400, 188, 104, enemy_sprite, 40)
+enemy = Enemy(400, 400, 188, 104, enemy_sprite, 40) 
 game.add_entity(enemy)
 game.run()
 

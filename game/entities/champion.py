@@ -29,5 +29,9 @@ class Champion(Entity):
         if event == "d":
             self.x += self.speed
     
-    def draw(self, screen):
-        screen.blit(self.sprite, (self.x, self.y))
+    def draw(self, screen, camera):
+        if self.sprite:
+            rect = self.get_rect()
+            screen_rect = camera.apply(rect)
+            scaled_image = pygame.transform.scale(self.sprite, (screen_rect.width, screen_rect.height))
+            screen.blit(scaled_image, screen_rect)
