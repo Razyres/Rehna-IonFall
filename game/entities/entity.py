@@ -15,7 +15,10 @@ class Entity():
     def update(self, event):
         pass
     
-    def draw(self, screen):
+    def draw(self, screen, camera):
         if self.sprite:
-            screen.blit(self.sprite, (self.x, self.y))
+            rect = self.get_rect()
+            screen_rect = camera.apply(rect)
+            scaled_image = pygame.transform.scale(self.sprite (int(screen_rect.width), int(screen_rect.height)))
+            screen.blit(scaled_image, screen_rect)
     

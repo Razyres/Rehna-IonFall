@@ -37,7 +37,7 @@ class Camera():
     
     def update_zoom(self):
         if abs(self.zoom - self.target_zoom) > 0.01:
-            self.zoom += (self.target_zoom - self.zoom) * self.zoom_speed
+            self.zoom += (self.target_zoom - self.zoom) * self.zoom_speed   
     
     def set_zoom(self, zoom_level):
         self.target_zoom = max(1.5, min(zoom_level, 3,0))
