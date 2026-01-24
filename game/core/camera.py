@@ -8,8 +8,8 @@ class Camera():
         self.map_height = map_height
         self.x = 0
         self.y = 0
-        self.zoom = 1.5
-        self.target_zoom = 1.5
+        self.zoom = 1
+        self.target_zoom = 1
         self.zoom_speed = 0.1
         self.smoothing = 0.1
         
