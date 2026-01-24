@@ -98,5 +98,4 @@ enemy = Enemy(400, 400, 188, 104, enemy_sprite, 40)
 game.add_entity(enemy)
 game.run()
 
-
 pygame.quit()
