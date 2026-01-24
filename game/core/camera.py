@@ -11,7 +11,7 @@ class Camera():
         self.zoom = 1
         self.target_zoom = 1
         self.zoom_speed = 0.1
-        self.smoothing = 0.1
+        self.smoothing = 0.15
         
     def follow(self, target_rect):
         target_x = target_rect.centerx - (self.width / 2) / self.zoom
