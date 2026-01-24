@@ -20,4 +20,4 @@ class GameMap :
                         tile_height = self.tmx_data.tileheight * camera.zoom
                         if (tile_width < screen_x < camera.width) and (tile_height < screen_y < camera.height):
                             scaled_tile = pygame.transform.scale(tile, (int(tile_width), int(tile_height)))
-                            screen.blit(scaled_tile, (screen_x, screen_y))
+                            screen.blit(scaled_tile, (screen_x, screen_y))  
