@@ -11,15 +11,23 @@ class Camera():
         self.zoom = 1
         self.target_zoom = 1
         self.zoom_speed = 0.1
-        self.smoothing = 0.1
+        self.smoothing = 0.15
         
     def follow(self, target_rect):
         target_x = target_rect.centerx - (self.width / 2) / self.zoom
         target_y = target_rect.centery - (self.height / 2) / self.zoom
-        self.x = (target_x - self.x) / self.smoothing
-        self.y = (target_y - self.y) / self.smoothing
-        self.x = max(0, min(self.x, self.map_width - self.width / self.zoom))
-        self.y = max(0, min(self.y, self.map_height - self.height / self.zoom))
+        self.x += (target_x - self.x) / self.smoothing
+        self.y += (target_y - self.y) / self.smoothing
+        max_x = self.map_width - (self.width / self.zoom)
+        max_y = self.map_height - (self.height / self.zoom)
+        if max_x < 0:
+            self.x = (self.map_width - self.width / self.zoom) / 2
+        else:
+            self.x = max(0, min(self.x, max_x))
+        if max_y < 0:
+            self.y = (self.map_height - self.height / self.zoom) / 2        
+        else:
+            self.y = max(0, min(self.y, max_y))
     
     def apply(self, rect):
         return pygame.Rect(

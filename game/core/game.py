@@ -26,7 +26,7 @@ class Game :
         self.player = None
         self.game_map = GameMap(map_path)
         self.camera = Camera(1500, 1000, self.game_map.map_width, self.game_map.map_height)
-        self.camera.set_zoom(1.5)
+        self.camera.set_zoom(1.0)
     
     def handle_events(self):
         for event in pygame.event.get():
@@ -50,16 +50,23 @@ class Game :
     def update(self, event):
         for entity in self.entities:
             entity.update(event)
-        #Collisions
+        # Collisions
         for entity in self.entities:
             if isinstance(entity, Enemy):
                 if entity.get_rect().colliderect(self.player.get_rect()):
                     self.player.take_damage(entity.damage)
-        #Death
+        # Death
         self.entities = [e for e in self.entities if not hasattr(e, "alive") or e.alive]
-        if self.player.alive == False :
+        if self.player.alive == False:
             self.running = False
-        self.camera.follow(self.player.get_rect())
+        # Mettre à jour la caméra ICI (une seule fois)
+        player_rect = pygame.Rect(
+            self.player.x,
+            self.player.y,
+            self.player.width,
+            self.player.height
+        )
+        self.camera.follow(player_rect)
         self.camera.update_zoom()
     
     def draw(self):
@@ -79,8 +86,8 @@ class Game :
                 self.running = False
             else :
                 self.update(event)
-            self.draw()
-            self.clock.tick(60)
+                self.draw()
+                self.clock.tick(60)
 
 pygame.init()
 
