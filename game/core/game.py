@@ -25,7 +25,7 @@ class Game :
         self.entities = []
         self.player = None
         self.game_map = GameMap(map_path)
-        self.camera = Camera(1500, 1000, self.game_map.map_width, self.game_map.map_height)
+        self.camera = Camera(self.game_map.map_width, self.game_map.map_height)
         self.camera.set_zoom(1.0)
     
     def handle_events(self):
