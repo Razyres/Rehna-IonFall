@@ -20,17 +20,17 @@ class Champion(Entity):
                 print("HP : ", self.hp)
     
     def update(self, event):
-        if event == "z":
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_z]:
             self.y -= self.speed
-        if event == "q":
+        if keys[pygame.K_q]:
             self.x -= self.speed
-        if event == "s":
+        if keys[pygame.K_s]:
             self.y += self.speed
-        if event == "d":
+        if keys[pygame.K_d]:
             self.x += self.speed
-    
+            
     def draw(self, screen, camera):
         if self.sprite:
-            rect = self.get_rect()
-            screen_rect = camera.apply(rect)
-            screen.blit(self.sprite, screen_rect)
+            screen_x, screen_y = camera.apply(self)
+            screen.blit(self.sprite, (screen_x, screen_y))

@@ -1,31 +1,30 @@
 import pygame
 
 class Camera:
-    def __init__(self, map_width, map_height):
+    def __init__(self, screen_width, screen_height, map_width, map_height):
         self.map_width = map_width
         self.map_height = map_height
-        display_info = pygame.display.Info()
-        self.screen_width = display_info.current_w
-        self.screen_height = display_info.current_h
+        self.screen_width = screen_width
+        self.screen_height = screen_height
         self.x = 0
         self.y = 0
-        self.zoom = 1.0
-        self.target_zoom = 1.0
+        self.zoom = 2.0
+        self.target_zoom = 2.0
         self.zoom_speed = 0.1
+        self.smoothing = 0.15
     
     def follow(self, target_rect):
         target_center_x = target_rect.x + target_rect.width//2
         target_center_y = target_rect.y + target_rect.height//2
-        self.x = target_center_x - (self.screen_width//2) / self.zoom
-        self.y = target_center_y - (self.screen_height//2) / self.zoom
         visible_width = self.screen_width / self.zoom
         visible_height = self.screen_height / self.zoom
-        self.x = max(0, min(self.x, self.map_width - visible_width))
-        self.x = max(0, min(self.y, self.map_height - visible_height))
-        
+        target_x = target_center_x - visible_width / 2
+        target_y = target_center_y - visible_height / 2
+        self.x += (target_x - self.x) * self.smoothing
+        self.y += (target_y - self.y) * self.smoothing
     
     def set_zoom(self, zoom_level):
-        self.target_zoom = max(0.5, min(zoom_level, 3.0))
+        self.target_zoom = max(2.0, min(zoom_level, 5.0))
     
     def update_zoom(self):
         if abs(self.zoom - self.target_zoom) > 0.01:

@@ -25,31 +25,27 @@ class Game :
         self.entities = []
         self.player = None
         self.game_map = GameMap(map_path)
-        self.camera = Camera(self.game_map.map_width, self.game_map.map_height)
+        screen_width = self.screen.get_width()
+        screen_height = self.screen.get_height()
+        self.camera = Camera(screen_width, screen_height, self.game_map.map_width, self.game_map.map_height)
         self.camera.set_zoom(1.0)
     
     def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return "stop"
+            if event.type == pygame.KEYDOWN:
+                if event.type == pygame.K_ESCAPE:
+                    self.running = False
             if event.type == pygame.MOUSEWHEEL:
                 if event.y > 0:
                     self.camera.set_zoom(self.camera.target_zoom + 0.2)
                 else:
                     self.camera.set_zoom(self.camera.target_zoom - 0.2)
-        pressed = pygame.key.get_pressed()
-        if pressed[pygame.K_z]:
-            return "z"
-        if pressed[pygame.K_q]:
-            return "q"
-        if pressed[pygame.K_s]:
-            return "s"
-        if pressed[pygame.K_d]:
-            return "d"
-        
+    
     def update(self, event):
         for entity in self.entities:
-            entity.update(event)
+            entity.update(None)
         # Collisions
         for entity in self.entities:
             if isinstance(entity, Enemy):
@@ -91,12 +87,12 @@ class Game :
 
 pygame.init()
 
-screen = pygame.display.set_mode((0, 0))
+screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 clock = pygame.time.Clock()
 game = Game(screen, clock)
 image = pygame.image.load("sprite/ORD1NAT3UR_face.png")
 image_pres = pygame.transform.scale(image, (40, 86))
-ORD1NAT3UR = Champion(10, 10, 7, 43, 20, image_pres, 100)
+ORD1NAT3UR = Champion(10, 10, 5, 43, 20, image_pres, 100)
 game.player = ORD1NAT3UR
 game.add_entity(ORD1NAT3UR)
 enemy = pygame.image.load("sprite/rick-astley.png")
