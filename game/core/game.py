@@ -60,7 +60,13 @@ class Game :
         if self.player.alive == False:
             self.running = False
         # Mettre à jour la caméra ICI (une seule fois)
-        self.camera.follow(self.player.get_rect())
+        player_rect = pygame.Rect(
+            self.player.x,
+            self.player.y,
+            self.player.width,
+            self.player.height
+        )
+        self.camera.follow(player_rect)
         self.camera.update_zoom()
     
     def draw(self):
