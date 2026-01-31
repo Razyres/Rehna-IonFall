@@ -8,8 +8,8 @@ class Camera:
         self.screen_height = screen_height
         self.x = 0
         self.y = 0
-        self.zoom = 2.0
-        self.target_zoom = 2.0
+        self.zoom = 3.0
+        self.target_zoom = 3.0
         self.zoom_speed = 0.1
         self.smoothing = 0.15
     
@@ -20,11 +20,21 @@ class Camera:
         visible_height = self.screen_height / self.zoom
         target_x = target_center_x - visible_width / 2
         target_y = target_center_y - visible_height / 2
+        max_x = self.map_width - visible_width
+        max_y = self.map_height - visible_width
+        if max_x < 0:
+            target_x = max_x / 2
+        else:
+            target_x = max(0, min(target_x, max_x))
+        if max_y < 0:
+            target_y = max_y / 2
+        else:
+            target_y = max_y / 2
         self.x += (target_x - self.x) * self.smoothing
         self.y += (target_y - self.y) * self.smoothing
     
     def set_zoom(self, zoom_level):
-        self.target_zoom = max(2.0, min(zoom_level, 5.0))
+        self.target_zoom = max(3.0, min(zoom_level, 5.0))
     
     def update_zoom(self):
         if abs(self.zoom - self.target_zoom) > 0.01:
