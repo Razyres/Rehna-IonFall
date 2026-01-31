@@ -16,16 +16,17 @@ class GameMap :
         end_y = int(min(self.tmx_data.height, (camera.y + camera.screen_height / camera.zoom) / tile_height + 2))
         for layer in self.tmx_data.visible_layers:
             if hasattr(layer, 'data'):
-                for x in range(start_x, end_x):
-                    for y in range(start_y, end_y):
-                        gid = layer[x][y]
-                        if gid:
-                            tile = self.tmx_data.get_tile_image_by_gid(gid)
-                            if tile:
-                                world_x = x * tile_width
-                                world_y = x * tile_height
-                                screen_x, screen_y = camera.apply_pos(world_x, world_y)
-                                scaled_width = int(tile_width * camera.zoom)
-                                scaled_height = int(tile_height * camera.zoom)
-                                scaled_tile = pygame.transform.scale(tile, (scaled_width, scaled_height))
-                                screen.blit(scaled_tile, (screen_x, screen_y))
+                for x, y, gid in layer:
+                    if x < start_x or x > end_x or y < start_y or y > end_y:
+                        continue
+                    if gid == 0:
+                        continue
+                    tile = self.tmx_data.get_tile_image_by_gid(gid)
+                    if tile:
+                        world_x = x * tile_width
+                        world_y = x * tile_height
+                        screen_x, screen_y = camera.apply_pos(world_x, world_y)
+                        scaled_width = int(tile_width * camera.zoom)
+                        scaled_height = int(tile_height * camera.zoom)
+                        scaled_tile = pygame.transform.scale(tile, (scaled_width, scaled_height))
+                        screen.blit(scaled_tile, (screen_x, screen_y))

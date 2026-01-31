@@ -20,16 +20,16 @@ class Camera:
         visible_height = self.screen_height / self.zoom
         target_x = target_center_x - visible_width / 2
         target_y = target_center_y - visible_height / 2
-        max_x = self.map_width - visible_width
-        max_y = self.map_height - visible_width
-        if max_x < 0:
-            target_x = max_x / 2
+        if visible_width >= self.map_width:
+            target_x = -(visible_width - self.map_width) / 2.0
         else:
-            target_x = max(0, min(target_x, max_x))
-        if max_y < 0:
-            target_y = max_y / 2
+            max_x = self.map_width - visible_width
+            target_x = max(0.0, min(target_x, max_x))
+        if visible_height >= self.map_height:
+            target_y = -(visible_height - self.map_height) / 2.0
         else:
-            target_y = max_y / 2
+            max_y = self.map_height - visible_height
+            target_y = max(0.0, min(target_y, max_y))
         self.x += (target_x - self.x) * self.smoothing
         self.y += (target_y - self.y) * self.smoothing
     

@@ -36,14 +36,14 @@ class Game :
                 return "stop"
             if event.type == pygame.KEYDOWN:
                 if event.type == pygame.K_ESCAPE:
-                    self.running = False
+                    return "stop"
             if event.type == pygame.MOUSEWHEEL:
                 if event.y > 0:
                     self.camera.set_zoom(self.camera.target_zoom + 0.2)
                 else:
                     self.camera.set_zoom(self.camera.target_zoom - 0.2)
     
-    def update(self, event):
+    def update(self):
         for entity in self.entities:
             entity.update(None)
         # Collisions
@@ -81,7 +81,7 @@ class Game :
             if event == "stop":
                 self.running = False
             else :
-                self.update(event)
+                self.update()
                 self.draw()
                 self.clock.tick(60)
 
