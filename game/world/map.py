@@ -22,7 +22,15 @@ class GameMap :
                         screen_x, screen_y = camera.apply_pos(world_x, world_y)
                         scaled_width = int(tile_width * camera.zoom)
                         scaled_height = int(tile_height * camera.zoom)
-                        if (screen_x + scaled_width < 0 or screen_x > camera.screen_width or screen_y + scaled_height < 0 or screen_y > camera.screen_height):
+                        if (screen_x + scaled_width < 0 or screen_x > camera.screen_width or
+                            screen_y + scaled_height < 0 or screen_y > camera.screen_height):
                             continue
                         scaled_tile = pygame.transform.scale(tile, (scaled_width, scaled_height))
                         screen.blit(scaled_tile, (screen_x, screen_y))
+
+
+
+
+
+
+
