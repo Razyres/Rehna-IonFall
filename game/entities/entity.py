@@ -17,7 +17,8 @@ class Entity():
     
     def draw(self, screen, camera):
         if self.sprite:
-            rect = self.get_rect()
-            screen_rect = camera.apply(rect)
-            screen.blit(self.sprite, screen_rect)
-    
+            screen_x, screen_y = camera.apply(self)
+            scaled_width = int(self.sprite.get_width() * camera.zoom)
+            scaled_height = int(self.sprite.get_height() * camera.zoom)
+            scaled_sprite = pygame.transform.scale(self.sprite, (scaled_width, scaled_height))
+            screen.blit(scaled_sprite, (screen_x, screen_y))
