@@ -690,53 +690,53 @@
  <objectgroup id="13" name="Spawns" visible="0">
   <object id="320" x="128" y="2560" width="64" height="64">
    <properties>
-    <property name="type" value="player"/>
+    <property name="entity_entity_type" value="player"/>
    </properties>
   </object>
   <object id="321" x="16" y="2608" width="1.33333" height="1.33333"/>
   <object id="322" x="2560" y="128" width="64" height="64">
    <properties>
-    <property name="type" value="player"/>
+    <property name="entity_entity_type" value="player"/>
    </properties>
   </object>
   <object id="324" x="800" y="2112" width="128" height="128">
    <properties>
-    <property name="type" value="monster"/>
+    <property name="entity_entity_type" value="monster"/>
    </properties>
   </object>
   <object id="330" x="2112" y="800" width="128" height="128">
    <properties>
-    <property name="type" value="monster"/>
+    <property name="entity_entity_type" value="monster"/>
    </properties>
   </object>
   <object id="331" x="1824" y="512" width="128" height="128">
    <properties>
-    <property name="type" value="monster"/>
+    <property name="entity_entity_type" value="monster"/>
    </properties>
   </object>
   <object id="326" x="512" y="1824" width="128" height="128">
    <properties>
-    <property name="type " value="monster"/>
+    <property name="entity_entity_type " value="monster"/>
    </properties>
   </object>
   <object id="327" x="512" y="960" width="96" height="96">
    <properties>
-    <property name="type " value="monster"/>
+    <property name="entity_type " value="monster"/>
    </properties>
   </object>
   <object id="328" x="1696" y="2144" width="96" height="96">
    <properties>
-    <property name="type " value="monster"/>
+    <property name="entity_type " value="monster"/>
    </properties>
   </object>
   <object id="329" x="2144" y="1664" width="96" height="96">
    <properties>
-    <property name="type " value="monster"/>
+    <property name="entity_type " value="monster"/>
    </properties>
   </object>
   <object id="332" x="992" y="512" width="96" height="96">
    <properties>
-    <property name="type " value="monster"/>
+    <property name="entity_type " value="monster"/>
    </properties>
   </object>
  </objectgroup>
