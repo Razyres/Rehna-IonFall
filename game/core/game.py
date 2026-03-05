@@ -11,6 +11,7 @@ from game.entities.champion import Champion
 from game.entities.enemy import Enemy
 from game.world.map import GameMap
 from game.core.camera import Camera
+from game.entities.sprites import Sprite
 import os
 current_dir = os.path.dirname(__file__)
 game_dir = os.path.dirname(current_dir)
@@ -29,6 +30,19 @@ class Game :
         screen_height = self.screen.get_height()
         self.camera = Camera(screen_width, screen_height, self.game_map.map_width, self.game_map.map_height)
     
+    def get_input():
+        dx, dy = 0, 0
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_d]:
+            dx += 1
+        if keys[pygame.K_q]:
+            dx -= 1
+        if keys[pygame.K_s]:
+            dy += 1
+        if keys[pygame.K_z]:
+            dy -= 1
+        return dx, dy
+    
     def handle_events(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -36,7 +50,9 @@ class Game :
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.running = False
-        
+            dx, dy = get_input()
+            
+            
     def update(self):
         for entity in self.entities:
             entity.update(None)
@@ -79,23 +95,9 @@ screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 
 clock = pygame.time.Clock()
 game = Game(screen, clock)
-image = pygame.image.load("sprite/0RD1N4T3UR_down.png")
-image_pres1 = pygame.transform.scale(image, (56, 86))
-image = pygame.image.load("sprite/0RD1N4T3UR_up.png")
-image_pres2 = pygame.transform.scale(image, (56, 86))
-image = pygame.image.load("sprite/0RD1N4T3UR_up_left.png")
-image_pres3 = pygame.transform.scale(image, (56, 86))
-image = pygame.image.load("sprite/0RD1N4T3UR_up_right.png")
-image_pres4 = pygame.transform.scale(image, (56, 86))
-image = pygame.image.load("sprite/0RD1N4T3UR_left.png")
-image_pres5 = pygame.transform.scale(image, (56, 86))
-image = pygame.image.load("sprite/0RD1N4T3UR_right.png")
-image_pres6 = pygame.transform.scale(image, (56, 86))
-image = pygame.image.load("sprite/0RD1N4T3UR_down_left.png")
-image_pres7 = pygame.transform.scale(image, (56, 86))
-image = pygame.image.load("sprite/0RD1N4T3UR_down_right.png")
-image_pres8 = pygame.transform.scale(image, (56, 86))
-ORD1NAT3UR = Champion(10, 10, 7, 56, 86, image_pres1, 100, image_pres2, image_pres3, image_pres4, image_pres5, image_pres6, image_pres7, image_pres8)
+sprites = Sprite("sprite", "0RD1N4T3UR")
+sprites.rect.center = (400, 300)
+ORD1NAT3UR = Champion(10, 10, 7, 56, 86, sprites, 100)
 game.player = ORD1NAT3UR
 game.add_entity(ORD1NAT3UR)
 
