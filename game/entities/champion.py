@@ -3,13 +3,13 @@ from .entity import Entity
 from .sprites import Sprite
 
 class Champion(Entity):
-    def __init__(self, x, y, speed, height, width, sprite : Sprite,hp):
-        super().__init__(x, y, width, height, sprite.current_sprite)
+    def __init__(self, x, y, speed, height, width, sprite_path: str ,sprite_prefix: str, hp):
+        self.sprites = Sprite(sprite_path, sprite_prefix)
+        super().__init__(x, y, width, height, self.sprites.current_sprite)
         self.speed = speed
         self.hp = hp
         self.last_hit_time = 0
         self.next_hit = 500
-        self.sprites = sprite
     
     def take_damage(self, damage):
         if self.hp <= 0:
@@ -35,4 +35,5 @@ class Champion(Entity):
     def draw(self, screen, camera):
         if self.sprite:
             screen_x, screen_y = camera.apply(self)
-            screen.blit(self.sprite, (screen_x, screen_y))
+            self.sprites.rect.topleft = (screen_x, screen_y)
+            self.sprites.draw(screen)

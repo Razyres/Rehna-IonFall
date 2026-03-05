@@ -30,7 +30,7 @@ class Game :
         screen_height = self.screen.get_height()
         self.camera = Camera(screen_width, screen_height, self.game_map.map_width, self.game_map.map_height)
     
-    def get_input():
+    def get_input(self):
         dx, dy = 0, 0
         keys = pygame.key.get_pressed()
         if keys[pygame.K_d]:
@@ -50,8 +50,8 @@ class Game :
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.running = False
-            dx, dy = get_input()
-            
+            dx, dy = self.get_input()
+            self.player.sprites.set_direction(dx, dy)
             
     def update(self):
         for entity in self.entities:
@@ -97,7 +97,7 @@ clock = pygame.time.Clock()
 game = Game(screen, clock)
 sprites = Sprite("sprite", "0RD1N4T3UR")
 sprites.rect.center = (400, 300)
-ORD1NAT3UR = Champion(10, 10, 7, 56, 86, sprites, 100)
+ORD1NAT3UR = Champion(10, 10, 7, 56, 86, "sprite", "0RD1N4T3UR", 100)
 game.player = ORD1NAT3UR
 game.add_entity(ORD1NAT3UR)
 
