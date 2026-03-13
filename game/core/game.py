@@ -29,6 +29,9 @@ class Game :
         screen_width = self.screen.get_width()
         screen_height = self.screen.get_height()
         self.camera = Camera(screen_width, screen_height, self.game_map.map_width, self.game_map.map_height)
+        self.collisions_rects = self.game_map.get_collision_rects()
+        print(f"Collisions chargées : {len(self.collisions_rects)}")
+
     
     def get_input(self):
         dx, dy = 0, 0
@@ -50,12 +53,10 @@ class Game :
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.running = False
-            dx, dy = self.get_input()
-            self.player.sprites.set_direction(dx, dy)
             
     def update(self):
         for entity in self.entities:
-            entity.update(None)
+            entity.update(None, self.collisions_rects)
         for entity in self.entities:
             if isinstance(entity, Enemy):
                 if entity.get_rect().colliderect(self.player.get_rect()):
@@ -63,12 +64,7 @@ class Game :
         self.entities = [e for e in self.entities if not hasattr(e, "alive") or e.alive]
         if self.player.alive == False:
             self.running = False
-        player_rect = pygame.Rect(
-            self.player.x,
-            self.player.y,
-            self.player.width,
-            self.player.height
-        )
+        player_rect = pygame.Rect(self.player.x, self.player.y, self.player.width, self.player.height)
         self.camera.follow(player_rect)
     
     def draw(self):
@@ -91,11 +87,12 @@ class Game :
 
 pygame.init()
 
-screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+screen = pygame.display.set_mode((1500, 1000))
 
 clock = pygame.time.Clock()
 game = Game(screen, clock)
-ORD1NAT3UR = Champion(10, 10, 7, 86, 56, "sprite", "0RD1N4T3UR", 100)
+spawn_x, spawn_y = game.game_map.get_spawn_point()
+ORD1NAT3UR = Champion(spawn_x, spawn_y, 7, 86, 40, "sprite", "0RD1N4T3UR", 100)
 game.player = ORD1NAT3UR
 game.add_entity(ORD1NAT3UR)
 

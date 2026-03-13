@@ -5,7 +5,7 @@ class Enemy(Entity):
         super().__init__(x, y, width, height, sprite)
         self.damage = damage
         
-    def update(self, event):
+    def update(self, event, collision_rects):
         pass
     
     def draw(self, screen, camera):

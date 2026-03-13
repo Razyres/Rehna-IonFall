@@ -10,6 +10,7 @@ class Champion(Entity):
         self.hp = hp
         self.last_hit_time = 0
         self.next_hit = 500
+        self.rect = self.get_rect()
     
     def take_damage(self, damage):
         if self.hp <= 0:
@@ -21,19 +22,34 @@ class Champion(Entity):
                 self.last_hit_time = now
                 print("HP : ", self.hp)
     
-    def update(self, event):
+    def update(self, event, collision_rects):
         keys = pygame.key.get_pressed()
-        if keys[pygame.K_z]:
-            self.y -= self.speed
-        if keys[pygame.K_q]:
-            self.x -= self.speed
-        if keys[pygame.K_s]:
-            self.y += self.speed
-        if keys[pygame.K_d]:
-            self.x += self.speed
-            
+        dx, dy = 0, 0
+        if keys[pygame.K_z]: dy -= self.speed
+        if keys[pygame.K_q]: dx -= self.speed
+        if keys[pygame.K_s]: dy += self.speed
+        if keys[pygame.K_d]: dx += self.speed
+
+        self.rect.x = self.x + dx
+        for rect in collision_rects:
+            if self.rect.colliderect(rect):
+                print(f"Collision X détectée ! player={self.rect} wall={rect}")
+                if dx > 0: self.rect.right = rect.left
+                if dx < 0: self.rect.left = rect.right
+        self.x = self.rect.x
+        self.rect.y = self.y + dy
+        for rect in collision_rects:
+            print(f"Distance : player={self.rect.topleft} wall={rect.topleft} overlap={self.rect.colliderect(rect)}")
+            if self.rect.colliderect(rect):
+                if dy > 0: self.rect.bottom = rect.top
+                if dy < 0: self.rect.top = rect.bottom
+        self.y = self.rect.y
+        print(f"Player rect={self.rect}, collisions={len(collision_rects)}")
+        self.sprites.set_direction(dx, dy)
+
+    
     def draw(self, screen, camera):
         if self.sprite:
             screen_x, screen_y = camera.apply(self)
-            self.sprites.rect.topleft = (screen_x, screen_y)
+            self.sprites.rect.topleft = (int(screen_x), int(screen_y))
             self.sprites.draw(screen)

@@ -12,7 +12,7 @@ class Entity():
     def get_rect(self):
         return pygame.Rect(self.x, self.y, self.width, self.height)
     
-    def update(self, event):
+    def update(self, event, collision_rects):
         pass
     
     def draw(self, screen, camera):
