@@ -4,13 +4,15 @@ from pathlib import Path
 class Sprite:
     DIRECTIONS = ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
     
-    def __init__(self, sprite_folder, sprite_prefix):
+    def __init__(self, sprite_folder, sprite_prefix, width, height):
         self.sprites = {}
         self.direction = "S"
         for direction in self.DIRECTIONS:
             path = Path(sprite_folder)/ f"{sprite_prefix}_{direction}.png"
             self.sprites[direction] = pygame.image.load(str(path)).convert_alpha()
         self.rect = self.sprites["S"].get_rect()
+        self.height = height
+        self.width = width
         
     @property
     def current_sprite(self):
@@ -27,4 +29,5 @@ class Sprite:
         self.direction = dir_map.get((nx, ny), self.direction)
         
     def draw(self, surface):
-        surface.blit(self.current_sprite, self.rect)
+        scaled = pygame.transform.scale(self.sprites[self.direction], (self.width, self.height))
+        surface.blit(scaled, self.rect)

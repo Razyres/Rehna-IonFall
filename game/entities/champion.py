@@ -4,7 +4,7 @@ from .sprites import Sprite
 
 class Champion(Entity):
     def __init__(self, x, y, speed, height, width, sprite_path: str ,sprite_prefix: str, hp):
-        self.sprites = Sprite(sprite_path, sprite_prefix)
+        self.sprites = Sprite(sprite_path, sprite_prefix, width, height)
         super().__init__(x, y, width, height, self.sprites.current_sprite)
         self.speed = speed
         self.hp = hp

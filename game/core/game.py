@@ -95,15 +95,13 @@ screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 
 clock = pygame.time.Clock()
 game = Game(screen, clock)
-sprites = Sprite("sprite", "0RD1N4T3UR")
-sprites.rect.center = (400, 300)
-ORD1NAT3UR = Champion(10, 10, 7, 56, 86, "sprite", "0RD1N4T3UR", 100)
+ORD1NAT3UR = Champion(10, 10, 7, 86, 56, "sprite", "0RD1N4T3UR", 100)
 game.player = ORD1NAT3UR
 game.add_entity(ORD1NAT3UR)
 
 enemy = pygame.image.load("sprite/rick-astley.png")
 enemy_sprite = pygame.transform.scale(enemy, (52, 94))
-enemy = Enemy(400, 400, 52, 94, enemy_sprite, 40) 
+enemy = Enemy(400, 400, 26, 47, enemy_sprite, 40) 
 game.add_entity(enemy)
 game.run()
 
