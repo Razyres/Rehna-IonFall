@@ -31,7 +31,7 @@ class Client:
                     self.handle_response(message)
                 except:
                     break  
-          
+        
         def close(self):
             self.closed = True
             self.server.close()

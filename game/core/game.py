@@ -16,7 +16,7 @@ import os
 current_dir = os.path.dirname(__file__)
 game_dir = os.path.dirname(current_dir)
 project_root = os.path.dirname(game_dir)
-map_path = os.path.join(project_root, "MAP", "map.tmx")
+map_path = os.path.join(project_root, "MAP", "MAP_1v1.tmx")
 
 class Game :
     def __init__(self, screen, clock):
@@ -96,7 +96,7 @@ screen = pygame.display.set_mode((1500, 1000))
 clock = pygame.time.Clock()
 game = Game(screen, clock)
 spawn_x, spawn_y = game.game_map.get_spawn_point()
-ORD1NAT3UR = Champion(spawn_x, spawn_y, 7, 86, 40, "sprite", "0RD1N4T3UR", 100)
+ORD1NAT3UR = Champion(672, 1225, 7, 86, 40, "sprite", "0RD1N4T3UR", 100)
 game.player = ORD1NAT3UR
 game.add_entity(ORD1NAT3UR)
 
