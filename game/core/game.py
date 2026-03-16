@@ -94,10 +94,15 @@ ORD1NAT3UR = Champion(672, 1225, 5, 86, 40, "sprite", "0RD1N4T3UR", 100)
 game.player = ORD1NAT3UR
 game.add_entity(ORD1NAT3UR)
 
-enemy = pygame.image.load("sprite/TheCop.png")
+enemy = pygame.image.load("sprite/TheCop_S.png")
 enemy_sprite = pygame.transform.scale(enemy, (52, 94))
 enemy = Enemy(400, 400, 52, 94, enemy_sprite, 40) 
 game.add_entity(enemy)
+
+enemy2 = pygame.image.load("sprite/Bunyon_S.jpg")
+enemy2_sprite = pygame.transform.scale(enemy2, (42, 102))
+enemy2 = Enemy(600, 600, 43, 102, enemy2_sprite, 20)
+game.add_entity(enemy2)
 game.run()
 
 pygame.quit()
