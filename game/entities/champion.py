@@ -33,18 +33,15 @@ class Champion(Entity):
         self.rect.x = self.x + dx
         for rect in collision_rects:
             if self.rect.colliderect(rect):
-                print(f"Collision X détectée ! player={self.rect} wall={rect}")
                 if dx > 0: self.rect.right = rect.left
                 if dx < 0: self.rect.left = rect.right
         self.x = self.rect.x
         self.rect.y = self.y + dy
         for rect in collision_rects:
-            print(f"Distance : player={self.rect.topleft} wall={rect.topleft} overlap={self.rect.colliderect(rect)}")
             if self.rect.colliderect(rect):
                 if dy > 0: self.rect.bottom = rect.top
                 if dy < 0: self.rect.top = rect.bottom
         self.y = self.rect.y
-        print(f"Player rect={self.rect}, collisions={len(collision_rects)}")
         self.sprites.set_direction(dx, dy)
 
     

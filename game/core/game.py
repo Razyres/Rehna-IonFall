@@ -30,7 +30,6 @@ class Game :
         screen_height = self.screen.get_height()
         self.camera = Camera(screen_width, screen_height, self.game_map.map_width, self.game_map.map_height)
         self.collisions_rects = self.game_map.get_collision_rects()
-        print(f"Collisions chargées : {len(self.collisions_rects)}")
 
     
     def get_input(self):
@@ -72,11 +71,6 @@ class Game :
         self.game_map.draw(self.screen, self.camera)
         for entity in self.entities:
             entity.draw(self.screen, self.camera)
-    
-        # Debug collisions
-        for rect in self.collisions_rects:
-            screen_rect = self.camera.apply_rect(rect)
-            pygame.draw.rect(self.screen, (255, 0, 0), screen_rect, 2)
         pygame.display.flip()
     
     def add_entity(self, entity):
@@ -96,13 +90,13 @@ screen = pygame.display.set_mode((1500, 1000))
 clock = pygame.time.Clock()
 game = Game(screen, clock)
 spawn_x, spawn_y = game.game_map.get_spawn_point()
-ORD1NAT3UR = Champion(672, 1225, 7, 86, 40, "sprite", "0RD1N4T3UR", 100)
+ORD1NAT3UR = Champion(672, 1225, 5, 86, 40, "sprite", "0RD1N4T3UR", 100)
 game.player = ORD1NAT3UR
 game.add_entity(ORD1NAT3UR)
 
 enemy = pygame.image.load("sprite/rick-astley.png")
 enemy_sprite = pygame.transform.scale(enemy, (52, 94))
-enemy = Enemy(400, 400, 26, 47, enemy_sprite, 40) 
+enemy = Enemy(400, 400, 52, 94, enemy_sprite, 40) 
 game.add_entity(enemy)
 game.run()
 

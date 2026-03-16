@@ -10,12 +10,9 @@ class GameMap :
     def get_collision_rects(self):
         collision_rects = []
         for layer in self.tmx_data.objectgroups:
-            print(f"Layer trouvé : {layer.name}")
             if layer.name == "Collision":
                 for obj in layer:
-                    print(f"Objet : x={obj.x}, y={obj.y}, w={obj.width}, h={obj.height}, name={obj.name}")
                     collision_rects.append(pygame.Rect(obj.x, obj.y, obj.width, obj.height))
-        print(f"Premier rect : {collision_rects[0] if collision_rects else 'vide'}")
         return collision_rects
 
     def get_spawn_point(self):
@@ -45,8 +42,7 @@ class GameMap :
                             continue
                         scaled_tile = pygame.transform.scale(tile, (scaled_width, scaled_height))
                         screen.blit(scaled_tile, (screen_x, screen_y))
-        print(f"Tile size: {self.tmx_data.tilewidth}x{self.tmx_data.tileheight}")
-        print(f"Map size: {self.map_width}x{self.map_height}")
+
 
 
 
