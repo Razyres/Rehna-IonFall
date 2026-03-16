@@ -72,7 +72,11 @@ class Game :
         self.game_map.draw(self.screen, self.camera)
         for entity in self.entities:
             entity.draw(self.screen, self.camera)
-        
+    
+        # Debug collisions
+        for rect in self.collisions_rects:
+            screen_rect = self.camera.apply_rect(rect)
+            pygame.draw.rect(self.screen, (255, 0, 0), screen_rect, 2)
         pygame.display.flip()
     
     def add_entity(self, entity):
