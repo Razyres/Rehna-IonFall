@@ -6,11 +6,16 @@ class Enemy(Entity):
         self.damage = damage
         self.hp = hp
     
+    def take_damage(self, damage):
+        self.hp -= damage
+        print("Enemy HP : ", self.hp)
+        if self.hp <= 0:
+            self.alive = False
+    
     def update(self, event, collision_rects):
         pass
     
     def draw(self, screen, camera):
         if self.sprite:
-            rect = self.get_rect()
-            screen_rect = camera.apply(rect)
-            screen.blit(self.sprite, screen_rect)
+            screen_x, screen_y = camera.apply(self)
+            screen.blit(self.sprite, (int(screen_x), int(screen_y)))

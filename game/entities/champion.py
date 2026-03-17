@@ -22,8 +22,7 @@ class Champion(Entity):
         dist = math.sqrt(dx**2 + dy**2)
         if dist == 0:
             return None
-        return Projectile(self.x, self.y, dx, dy, 10, 20, "sprite/bullet_0RD1N4T3UR_W.png")
-    
+        return Projectile(self.x, self.y, dx/dist, dy/dist, 10, 20, "sprite/bullet_0RD1N4T3UR_W.png")
     
     def take_damage(self, damage):
         if self.hp <= 0:

@@ -10,6 +10,7 @@ class Projectile(Entity):
         self.speed = speed
         self.damage = damage
         self.sprite = pygame.image.load(sprite_path)
+        self.sprite = pygame.transform.scale(self.sprite, (2 * self.sprite.get_width(), 2 * self.sprite.get_height()))
         self.width = self.sprite.get_width()
         self.height = self.sprite.get_height()
         
@@ -28,5 +29,5 @@ class Projectile(Entity):
         screen_x, screen_y = camera.apply(self)
         scaled_w = self.width * camera.zoom
         scaled_h = self.height * camera.zoom
-        scaled = pygame.transform.scale(self.sprite, (scaled_w, scaled_h))
+        scaled = pygame.transform.scale(self.sprite, (int(scaled_w), int(scaled_h)))
         screen.blit(scaled, (int(screen_x), int(screen_y)))

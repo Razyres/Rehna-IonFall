@@ -99,12 +99,12 @@ class Game :
 
 pygame.init()
 
-screen = pygame.display.set_mode((1500, 1000))
+screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 
 clock = pygame.time.Clock()
 game = Game(screen, clock)
 spawn_x, spawn_y = game.game_map.get_spawn_point()
-ORD1NAT3UR = Champion(101, 1444, 5, 86, 40, "sprite", "0RD1N4T3UR", 100)
+ORD1NAT3UR = Champion(101, 1444, 5, 86, 44, "sprite", "0RD1N4T3UR", 100)
 game.player = ORD1NAT3UR
 game.add_entity(ORD1NAT3UR)
 
