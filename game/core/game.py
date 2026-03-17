@@ -12,6 +12,7 @@ from game.entities.enemy import Enemy
 from game.world.map import GameMap
 from game.core.camera import Camera
 from game.entities.sprites import Sprite
+from game.entities.projectile import Projectile
 import os
 current_dir = os.path.dirname(__file__)
 game_dir = os.path.dirname(current_dir)
@@ -52,6 +53,10 @@ class Game :
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.running = False
+                if event.key == pygame.K_a:
+                    projectile = self.player.attack(self.camera)
+                    if projectile:
+                        self.add_entity(projectile)
             
     def update(self):
         for entity in self.entities:
@@ -60,6 +65,13 @@ class Game :
             if isinstance(entity, Enemy):
                 if entity.get_rect().colliderect(self.player.get_rect()):
                     self.player.take_damage(entity.damage)
+        for entity in self.entities:
+            if isinstance(entity, Projectile):
+                for other in self.entities:
+                    if isinstance(other, Enemy):
+                        if entity.rect.colliderect(other.get_rect()):
+                            other.take_damage(entity.damage)
+                            entity.alive = False
         self.entities = [e for e in self.entities if not hasattr(e, "alive") or e.alive]
         if self.player.alive == False:
             self.running = False
@@ -90,7 +102,7 @@ screen = pygame.display.set_mode((1500, 1000))
 clock = pygame.time.Clock()
 game = Game(screen, clock)
 spawn_x, spawn_y = game.game_map.get_spawn_point()
-ORD1NAT3UR = Champion(672, 1225, 5, 86, 40, "sprite", "0RD1N4T3UR", 100)
+ORD1NAT3UR = Champion(101, 1444, 5, 86, 40, "sprite", "0RD1N4T3UR", 100)
 game.player = ORD1NAT3UR
 game.add_entity(ORD1NAT3UR)
 

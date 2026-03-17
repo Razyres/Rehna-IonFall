@@ -1,7 +1,8 @@
 import pygame
+import math
 from .entity import Entity
 from .sprites import Sprite
-
+from .projectile import Projectile
 class Champion(Entity):
     def __init__(self, x, y, speed, height, width, sprite_path: str ,sprite_prefix: str, hp):
         self.sprites = Sprite(sprite_path, sprite_prefix, width, height)
@@ -11,6 +12,18 @@ class Champion(Entity):
         self.last_hit_time = 0
         self.next_hit = 500
         self.rect = self.get_rect()
+    
+    def attack(self, camera):
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+        world_mouse_x = mouse_x / camera.zoom + camera.x
+        world_mouse_y = mouse_y / camera.zoom + camera.y
+        dx = world_mouse_x - self.x
+        dy = world_mouse_y - self.y
+        dist = math.sqrt(dx**2 + dy**2)
+        if dist == 0:
+            return None
+        return Projectile(self.x, self.y, dx, dy, 10, 20, "sprite/bullet_0RD1N4T3UR_W.png")
+    
     
     def take_damage(self, damage):
         if self.hp <= 0:
