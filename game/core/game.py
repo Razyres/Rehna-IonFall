@@ -99,7 +99,7 @@ class Game :
 
 pygame.init()
 
-screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
+screen = pygame.display.set_mode((0, 0), pygame.FULLSCREENd)
 
 clock = pygame.time.Clock()
 game = Game(screen, clock)
