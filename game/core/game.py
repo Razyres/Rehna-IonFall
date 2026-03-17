@@ -54,9 +54,7 @@ class Game :
                 if event.key == pygame.K_ESCAPE:
                     self.running = False
                 if event.key == pygame.K_a:
-                    print("Touche A pressée")
                     projectile = self.player.attack(self.camera)
-                    print(f"Projectile créé : {projectile}")
                     if projectile:
                         self.add_entity(projectile)
             
@@ -99,7 +97,7 @@ class Game :
 
 pygame.init()
 
-screen = pygame.display.set_mode((0, 0), pygame.FULLSCREENd)
+screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
 
 clock = pygame.time.Clock()
 game = Game(screen, clock)
