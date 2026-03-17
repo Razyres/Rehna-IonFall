@@ -54,7 +54,9 @@ class Game :
                 if event.key == pygame.K_ESCAPE:
                     self.running = False
                 if event.key == pygame.K_a:
+                    print("Touche A pressée")
                     projectile = self.player.attack(self.camera)
+                    print(f"Projectile créé : {projectile}")
                     if projectile:
                         self.add_entity(projectile)
             
@@ -108,12 +110,12 @@ game.add_entity(ORD1NAT3UR)
 
 enemy = pygame.image.load("sprite/TheCop_S.png")
 enemy_sprite = pygame.transform.scale(enemy, (52, 94))
-enemy = Enemy(500, 500, 52, 94, enemy_sprite, 40) 
+enemy = Enemy(500, 500, 52, 94, enemy_sprite, 40, 100) 
 game.add_entity(enemy)
 
 enemy2 = pygame.image.load("sprite/Bunyon_S.png")
 enemy2_sprite = pygame.transform.scale(enemy2, (42, 102))
-enemy2 = Enemy(720, 720, 43, 102, enemy2_sprite, 20)
+enemy2 = Enemy(720, 720, 43, 102, enemy2_sprite, 20, 50)
 game.add_entity(enemy2)
 game.run()
 

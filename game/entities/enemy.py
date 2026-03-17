@@ -1,10 +1,11 @@
 from .entity import Entity
 import pygame
 class Enemy(Entity):
-    def __init__(self, x, y, width, height, sprite, damage):
+    def __init__(self, x, y, width, height, sprite, damage, hp):
         super().__init__(x, y, width, height, sprite)
         self.damage = damage
-        
+        self.hp = hp
+    
     def update(self, event, collision_rects):
         pass
     
