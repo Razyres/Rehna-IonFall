@@ -95,26 +95,3 @@ class Game :
             self.draw()
             self.clock.tick(60)
 
-pygame.init()
-
-screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
-
-clock = pygame.time.Clock()
-game = Game(screen, clock)
-spawn_x, spawn_y = game.game_map.get_spawn_point()
-ORD1NAT3UR = Champion(101, 1444, 5, 86, 44, "sprite", "0RD1N4T3UR", 100)
-game.player = ORD1NAT3UR
-game.add_entity(ORD1NAT3UR)
-
-enemy = pygame.image.load("sprite/TheCop_S.png")
-enemy_sprite = pygame.transform.scale(enemy, (52, 94))
-enemy = Enemy(500, 500, 52, 94, enemy_sprite, 40, 100) 
-game.add_entity(enemy)
-
-enemy2 = pygame.image.load("sprite/Bunyon_S.png")
-enemy2_sprite = pygame.transform.scale(enemy2, (42, 102))
-enemy2 = Enemy(720, 720, 43, 102, enemy2_sprite, 20, 50)
-game.add_entity(enemy2)
-game.run()
-
-pygame.quit()

@@ -13,7 +13,7 @@ class Champion(Entity):
         self.next_hit = 500
         self.rect = self.get_rect()
         self.last_shot = 0
-        self.cooldown = 500
+        self.cooldown = 300
     
     def attack(self, camera):
         mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -43,10 +43,23 @@ class Champion(Entity):
     def update(self, event, collision_rects):
         keys = pygame.key.get_pressed()
         dx, dy = 0, 0
-        if keys[pygame.K_z]: dy -= self.speed
-        if keys[pygame.K_q]: dx -= self.speed
-        if keys[pygame.K_s]: dy += self.speed
-        if keys[pygame.K_d]: dx += self.speed
+        if keys[pygame.K_z] and keys[pygame.K_q]:
+            dy -= self.speed//1.5
+            dx -= self.speed//1.5
+        elif keys[pygame.K_z] and keys[pygame.K_d]:
+            dy -= self.speed//1.5
+            dx += self.speed//1.5
+        elif keys[pygame.K_s] and keys[pygame.K_q]:
+            dy += self.speed//1.5
+            dx -= self.speed//1.5
+        elif keys[pygame.K_s] and keys[pygame.K_d]:
+            dy += self.speed//1.5
+            dx += self.speed//1.5
+        elif keys[pygame.K_z]: dy -= self.speed
+        elif keys[pygame.K_q]: dx -= self.speed
+        elif keys[pygame.K_s]: dy += self.speed
+        elif keys[pygame.K_d]: dx += self.speed
+        
 
         self.rect.x = self.x + dx
         for rect in collision_rects:
