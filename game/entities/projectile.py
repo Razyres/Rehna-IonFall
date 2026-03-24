@@ -3,7 +3,7 @@ import math
 from .entity import Entity
 
 class Projectile(Entity):
-    def __init__(self, x, y, dx, dy, speed, damage, sprite_path):
+    def __init__(self, x, y, dx, dy, speed, damage, range, sprite_path):
         super().__init__(x, y, 10, 10, None)
         self.dx = dx
         self.dy = dy
@@ -13,8 +13,13 @@ class Projectile(Entity):
         self.sprite = pygame.transform.scale(self.sprite, (2 * self.sprite.get_width(), 2 * self.sprite.get_height()))
         self.width = self.sprite.get_width()
         self.height = self.sprite.get_height()
+        self.range = range
+
         
     def update(self, event, collision_rect):
+        if self.range <= 0:
+            self.alive = False
+        self.range -= 1
         self.x += self.dx * self.speed
         self.y += self.dy * self.speed
         self.rect = self.get_rect()
