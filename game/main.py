@@ -17,20 +17,18 @@ clock = pygame.time.Clock()
 menu = Menu(screen)
 chosen_champion = menu.run()
 
-if chosen_champion:
+CHAMPIONS_CONFIG = {
+    "SuperComputer": {"sprite_prefix": "0RD1N4T3UR", "speed": 7, "height": 86, "width": 40, "hp": 100},
+    "Pretresse":     {"sprite_prefix": "pretresse",  "speed": 6, "height": 86, "width": 40, "hp": 120}
+}
+
+if chosen_champion and chosen_champion in CHAMPIONS_CONFIG:
+    config = CHAMPIONS_CONFIG[chosen_champion]
     game = Game(screen, clock)
-    spawnx, spawny = 120, 1450
-    ORD1N4T3UR = Champion(spawnx, spawny, 5, 86, 40, "sprite", "0RD1N4T3UR", 100)
-    game.player = ORD1N4T3UR
-    game.add_entity(ORD1N4T3UR)
-    enemy = pygame.image.load("sprite/TheCop_S.png")
-    enemy_sprite = pygame.transform.scale(enemy, (52, 94))
-    enemy = Enemy(500, 500, 52, 94, enemy_sprite, 40, 100) 
-    game.add_entity(enemy)
-    enemy2 = pygame.image.load("sprite/Bunyon_S.png")
-    enemy2_sprite = pygame.transform.scale(enemy2, (42, 102))
-    enemy2 = Enemy(720, 720, 43, 102, enemy2_sprite, 20, 50)
-    game.add_entity(enemy2)
+    spawn_x, spawn_y = 120, 1430
+    player = Champion(spawn_x, spawn_y,config["speed"], config["height"], config["width"], "sprite", config["sprite_prefix"], config["hp"])
+    game.player = player
+    game.add_entity(player)
     game.run()
 
 pygame.quit()
