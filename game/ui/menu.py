@@ -12,7 +12,8 @@ BUTTON_PLAY_HOVER  = (140, 60, 220)
 TEXT_COLOR    = (220, 220, 255)
 WARNING_COLOR = (255, 80, 180)
 
-FONT_PATH = os.path.join("game", "assets", "fonts", "Orbitron-Bold.ttf")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+FONT_PATH = os.path.join(BASE_DIR, "..", "assets", "font", "Orbitron-Bold.ttf")
 
 class Menu():
     CHAMPIONS = ["Pretresse", "SuperComputer"]
@@ -22,9 +23,9 @@ class Menu():
         self.running = True
         self.selected = None
         self.show_warning = False
-        self.font_title = pygame.font.SysFont(FONT_PATH, 56)
-        self.font = pygame.font.SysFont(FONT_PATH, 28)
-        self.font_small = pygame.font.SysFont(FONT_PATH, 22)
+        self.font_title = pygame.font.Font(FONT_PATH, 46)
+        self.font       = pygame.font.Font(FONT_PATH, 22)
+        self.font_small = pygame.font.Font(FONT_PATH, 20)
         self.portraits = {}
         for name in self.CHAMPIONS:
             path = os.path.join("Fiche_perso", f"{name}.png")
@@ -85,8 +86,10 @@ class Menu():
         self.play_button.draw(self.screen)
         if self.show_warning:
             warning = self.font.render("Veuillez séléctionner un personnage !", True, WARNING_COLOR)
-            self.screen.blit(warning, warning.get_rect(centerx=self.screen.get_width()//2, y=self.screen.get_height() - 55))
+            self.screen.blit(warning, warning.get_rect(centerx=self.screen.get_width()//2, y=self.screen.get_height() - 207))
         pygame.display.flip()
+        print(f"Font path: {FONT_PATH}")
+        print(f"Font exists: {os.path.exists(FONT_PATH)}")
     
     def _portrait_rect(self, index):
         sw = self.screen.get_width()

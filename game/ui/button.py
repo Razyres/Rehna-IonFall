@@ -7,7 +7,7 @@ class Button():
         self.text = text
         self.color = color
         self.hover_color = hover_color
-        self.font = pygame.font.SysFont(os.path.join("game", "assets", "fonts", "Orbitron-Bold.ttf"), 24)
+        self.font = pygame.font.Font(os.path.join("game", "assets", "font", "Orbitron-Bold.ttf"), 22)
     
     def draw(self, screen):
         mouse_pos = pygame.mouse.get_pos()
