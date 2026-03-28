@@ -9,7 +9,8 @@ class Sprite:
         self.direction = "S"
         for direction in self.DIRECTIONS:
             path = Path(sprite_folder)/ f"{sprite_prefix}_{direction}.png"
-            self.sprites[direction] = pygame.image.load(str(path)).convert_alpha()
+            img = pygame.image.load(path).convert_alpha()
+            self.sprites[direction] = pygame.transform.scale(img, (width, height))
         self.rect = self.sprites["S"].get_rect()
         self.height = height
         self.width = width
@@ -29,5 +30,4 @@ class Sprite:
         self.direction = dir_map.get((nx, ny), self.direction)
         
     def draw(self, surface):
-        scaled = pygame.transform.scale(self.sprites[self.direction], (self.width, self.height))
-        surface.blit(scaled, self.rect)
+        surface.blit(self.sprites[self.direction], self.rect)

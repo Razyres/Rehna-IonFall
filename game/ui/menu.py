@@ -88,8 +88,6 @@ class Menu():
             warning = self.font.render("Veuillez séléctionner un personnage !", True, WARNING_COLOR)
             self.screen.blit(warning, warning.get_rect(centerx=self.screen.get_width()//2, y=self.screen.get_height() - 207))
         pygame.display.flip()
-        print(f"Font path: {FONT_PATH}")
-        print(f"Font exists: {os.path.exists(FONT_PATH)}")
     
     def _portrait_rect(self, index):
         sw = self.screen.get_width()

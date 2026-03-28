@@ -4,7 +4,7 @@ from .entity import Entity
 from .sprites import Sprite
 from .projectile import Projectile
 class Champion(Entity):
-    def __init__(self, x, y, speed, height, width, sprite_path: str ,sprite_prefix: str, hp):
+    def __init__(self, x, y, speed, width, height, sprite_path: str ,sprite_prefix: str, hp):
         self.sprites = Sprite(sprite_path, sprite_prefix, width, height)
         super().__init__(x, y, width, height, self.sprites.current_sprite)
         self.speed = speed
@@ -27,7 +27,7 @@ class Champion(Entity):
         now = pygame.time.get_ticks()
         if now - self.last_shot >= self.cooldown:
             self.last_shot = now
-            return Projectile(self.x, self.y, dx/dist, dy/dist, 10, 20, 30, "sprite/bullet_0RD1N4T3UR_W.png")
+            return Projectile(self.x, self.y, dx/dist, dy/dist, 10, 100, 30, "sprite/bullet_0RD1N4T3UR_W.png")
         
     
     def take_damage(self, damage):
@@ -79,5 +79,7 @@ class Champion(Entity):
     def draw(self, screen, camera):
         if self.sprite:
             screen_x, screen_y = camera.apply(self)
-            self.sprites.rect.topleft = (int(screen_x), int(screen_y))
-            self.sprites.draw(screen)
+            scaled_w = int(self.width * camera.zoom)
+            scaled_h = int(self.height * camera.zoom)
+            scaled = pygame.transform.scale(self.sprites.current_sprite, (scaled_w, scaled_h))
+            screen.blit(scaled, (int(screen_x), int(screen_y)))

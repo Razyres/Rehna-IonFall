@@ -13,6 +13,7 @@ from game.world.map import GameMap
 from game.core.camera import Camera
 from game.entities.sprites import Sprite
 from game.entities.projectile import Projectile
+from game.entities.nexus import Nexus
 import os
 current_dir = os.path.dirname(__file__)
 game_dir = os.path.dirname(current_dir)
@@ -31,6 +32,10 @@ class Game :
         screen_height = self.screen.get_height()
         self.camera = Camera(screen_width, screen_height, self.game_map.map_width, self.game_map.map_height)
         self.collisions_rects = self.game_map.get_collision_rects()
+        self.nexus_r = Nexus(253, 1240, 100, 100, "sprite/nexus_r.png", hp=1000)
+        self.nexus_v = Nexus(1232, 220, 128, 128, "sprite/nexus_v.png", hp=1000)
+        self.add_entity(self.nexus_r)
+        self.add_entity(self.nexus_v)
 
     
     def get_input(self):
@@ -59,8 +64,10 @@ class Game :
                         self.add_entity(projectile)
             
     def update(self):
+        nexus_rects = [self.nexus_r.get_rect(), self.nexus_v.get_rect()]
+        all_collisions = self.collisions_rects + nexus_rects
         for entity in self.entities:
-            entity.update(None, self.collisions_rects)
+            entity.update(None, all_collisions)
         for entity in self.entities:
             if isinstance(entity, Enemy):
                 if entity.get_rect().colliderect(self.player.get_rect()):
@@ -68,7 +75,7 @@ class Game :
         for entity in self.entities:
             if isinstance(entity, Projectile):
                 for other in self.entities:
-                    if isinstance(other, Enemy):
+                    if isinstance(other, Enemy) or other == self.nexus_v:
                         if entity.rect.colliderect(other.get_rect()):
                             other.take_damage(entity.damage)
                             entity.alive = False
@@ -77,6 +84,8 @@ class Game :
             self.running = False
         player_rect = pygame.Rect(self.player.x, self.player.y, self.player.width, self.player.height)
         self.camera.follow(player_rect)
+        if self.nexus_v.alive == False or self.nexus_r.alive == False:
+            self.running = False
     
     def draw(self):
         self.screen.fill((0, 0, 0))

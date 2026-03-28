@@ -10,7 +10,7 @@ class Entity():
         self.alive = True
     
     def get_rect(self):
-        return pygame.Rect(self.x, self.y, self.width/2, self.height/2)
+        return pygame.Rect(self.x, self.y, self.width, self.height)
     
     def update(self, event, collision_rects):
         if self.alive == False:
