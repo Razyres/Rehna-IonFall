@@ -18,8 +18,8 @@ menu = Menu(screen)
 chosen_champion = menu.run()
 
 CHAMPIONS_CONFIG = {
-    "SuperComputer": {"sprite_prefix": "0RD1N4T3UR", "speed": 7, "height": 43, "width": 20, "hp": 100},
-    "Pretresse":     {"sprite_prefix": "pretresse",  "speed": 6, "height": 43, "width": 20, "hp": 120}
+    "Ordinateur": {"sprite_prefix": "0RD1N4T3UR", "speed": 7, "height": 43, "width": 20, "hp": 100},
+    "Freud":     {"sprite_prefix": "pretresse",  "speed": 6, "height": 43, "width": 20, "hp": 120}
 }
 
 if chosen_champion and chosen_champion in CHAMPIONS_CONFIG:

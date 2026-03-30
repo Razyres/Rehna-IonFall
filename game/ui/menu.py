@@ -16,7 +16,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 FONT_PATH = os.path.join(BASE_DIR, "..", "assets", "font", "Orbitron-Bold.ttf")
 
 class Menu():
-    CHAMPIONS = ["Pretresse", "SuperComputer"]
+    CHAMPIONS = ["Freud" , "Ordinateur"]
     
     def __init__(self, screen):
         self.screen = screen
@@ -28,7 +28,7 @@ class Menu():
         self.font_small = pygame.font.Font(FONT_PATH, 20)
         self.portraits = {}
         for name in self.CHAMPIONS:
-            path = os.path.join("Fiche_perso", f"{name}.png")
+            path = os.path.join("sprite", f"HEAD_{name}.png")
             img = pygame.image.load(path).convert_alpha()
             self.portraits[name] = pygame.transform.scale(img, (150, 200))
         sw = screen.get_width()
