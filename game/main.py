@@ -18,15 +18,16 @@ menu = Menu(screen)
 chosen_champion = menu.run()
 
 CHAMPIONS_CONFIG = {
-    "Ordinateur": {"sprite_prefix": "0RD1N4T3UR", "speed": 7, "height": 43, "width": 20, "hp": 100},
-    "Freud":     {"sprite_prefix": "pretresse",  "speed": 6, "height": 43, "width": 20, "hp": 120}
+    "Ordinateur": {"sprite_prefix": "0RD1N4T3UR", "speed": 7, "hp": 100},
+    "Freud":     {"sprite_prefix": "pretresse",  "speed": 6, "hp": 120},
+    "Vagabon": {"sprite_prefix": "Vagabon", "speed": 7, "hp" : 100}
 }
 
 if chosen_champion and chosen_champion in CHAMPIONS_CONFIG:
     config = CHAMPIONS_CONFIG[chosen_champion]
     game = Game(screen, clock)
     spawn_x, spawn_y = 120, 1430
-    player = Champion(spawn_x, spawn_y,config["speed"], config["width"], config["height"], "sprite", config["sprite_prefix"], config["hp"])
+    player = Champion(spawn_x, spawn_y,config["speed"], "sprite", config["sprite_prefix"], config["hp"])
     game.player = player
     game.add_entity(player)
     game.run()

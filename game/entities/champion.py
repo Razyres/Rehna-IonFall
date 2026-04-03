@@ -4,9 +4,9 @@ from .entity import Entity
 from .sprites import Sprite
 from .projectile import Projectile
 class Champion(Entity):
-    def __init__(self, x, y, speed, width, height, sprite_path: str ,sprite_prefix: str, hp):
-        self.sprites = Sprite(sprite_path, sprite_prefix, width, height)
-        super().__init__(x, y, width, height, self.sprites.current_sprite)
+    def __init__(self, x, y, speed, sprite_path: str ,sprite_prefix: str, hp):
+        self.sprites = Sprite(sprite_path, sprite_prefix)
+        super().__init__(x, y, self.sprites.width, self.sprites.height, self.sprites.current_sprite)
         self.speed = speed
         self.hp = hp
         self.last_hit_time = 0
@@ -44,17 +44,17 @@ class Champion(Entity):
         keys = pygame.key.get_pressed()
         dx, dy = 0, 0
         if keys[pygame.K_z] and keys[pygame.K_q]:
-            dy -= self.speed//1.5
-            dx -= self.speed//1.5
+            dy -= self.speed//1.2
+            dx -= self.speed//1.2
         elif keys[pygame.K_z] and keys[pygame.K_d]:
-            dy -= self.speed//1.5
-            dx += self.speed//1.5
+            dy -= self.speed//1.2
+            dx += self.speed//1.2
         elif keys[pygame.K_s] and keys[pygame.K_q]:
-            dy += self.speed//1.5
-            dx -= self.speed//1.5
+            dy += self.speed//1.2
+            dx -= self.speed//1.2
         elif keys[pygame.K_s] and keys[pygame.K_d]:
-            dy += self.speed//1.5
-            dx += self.speed//1.5
+            dy += self.speed//1.2
+            dx += self.speed//1.2
         elif keys[pygame.K_z]: dy -= self.speed
         elif keys[pygame.K_q]: dx -= self.speed
         elif keys[pygame.K_s]: dy += self.speed
