@@ -11,7 +11,7 @@ from game.entities.champion import Champion
 from game.entities.enemy import Enemy
 
 pygame.init()
-screen = pygame.display.set_mode((0,0), pygame.FULLSCREEN)
+screen = pygame.display.set_mode((1500, 1000))
 clock = pygame.time.Clock()
 
 menu = Menu(screen)

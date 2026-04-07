@@ -46,19 +46,48 @@ class Champion(Entity):
         if keys[pygame.K_z] and keys[pygame.K_q]:
             dy -= self.speed//1.2
             dx -= self.speed//1.2
+            self.width = self.sprites.width
+            self.height = self.sprites.height
+            self.rect = self.get_rect()
         elif keys[pygame.K_z] and keys[pygame.K_d]:
             dy -= self.speed//1.2
             dx += self.speed//1.2
+            self.width = self.sprites.width
+            self.height = self.sprites.height
+            self.rect = self.get_rect()
         elif keys[pygame.K_s] and keys[pygame.K_q]:
             dy += self.speed//1.2
             dx -= self.speed//1.2
+            self.width = self.sprites.width
+            self.height = self.sprites.height
+            self.rect = self.get_rect()
         elif keys[pygame.K_s] and keys[pygame.K_d]:
             dy += self.speed//1.2
             dx += self.speed//1.2
-        elif keys[pygame.K_z]: dy -= self.speed
-        elif keys[pygame.K_q]: dx -= self.speed
-        elif keys[pygame.K_s]: dy += self.speed
-        elif keys[pygame.K_d]: dx += self.speed
+            self.width = self.sprites.width
+            self.height = self.sprites.height
+            self.rect = self.get_rect()
+        elif keys[pygame.K_z]: 
+            dy -= self.speed
+            self.width = self.sprites.width
+            self.height = self.sprites.height
+            self.rect = self.get_rect()
+        elif keys[pygame.K_q]:
+            dx -= self.speed
+            self.width = self.sprites.width
+            self.height = self.sprites.height
+            self.rect = self.get_rect()
+        elif keys[pygame.K_s]: 
+            dy += self.speed
+            self.width = self.sprites.width
+            self.height = self.sprites.height
+            self.rect = self.get_rect()
+        elif keys[pygame.K_d]: 
+            dx += self.speed
+            self.width = self.sprites.width
+            self.height = self.sprites.height
+            self.rect = self.get_rect()
+        print(f"{self.width}, {self.height}")
         
 
         self.rect.x = self.x + dx
