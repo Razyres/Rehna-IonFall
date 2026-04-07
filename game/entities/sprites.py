@@ -46,6 +46,8 @@ class Sprite:
         nx = (dx > 0) - (dx < 0)
         ny = (dy > 0) - (dy < 0)
         self.direction = dir_map.get((nx, ny), self.direction)
+        self.width = self.sprites[self.direction].get_width()
+        self.height = self.sprites[self.direction].get_height()
         
     def draw(self, surface):
         surface.blit(self.sprites[self.direction], self.rect)
