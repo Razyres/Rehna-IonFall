@@ -105,9 +105,9 @@ class Server:
         pass
     
     def send(self, r_type, data, client):
-         message = {"type": r_type, "data": data}
-         message = json.dumps(message).encode("ascii")
-         client.send(message)
+        message = {"type": r_type, "data": data}
+        message = json.dumps(message).encode("ascii")
+        client.send(message)
     
     def send_to_player(self, r_type, data, client):
         opponent = self.opponent.get(client)
