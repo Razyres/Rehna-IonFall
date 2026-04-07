@@ -16,6 +16,6 @@ class Enemy(Entity):
         pass
     
     def draw(self, screen, camera):
-        if self.sprite:
+        if self.image:
             screen_x, screen_y = camera.apply(self)
-            screen.blit(self.sprite, (int(screen_x), int(screen_y)))
+            screen.blit(self.image, (int(screen_x), int(screen_y)))

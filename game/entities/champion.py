@@ -63,8 +63,6 @@ class Champion(Entity):
             dy += self.speed
         elif keys[pygame.K_d]: 
             dx += self.speed
-        
-
         self.rect.x = self.x + dx
         for rect in collision_rects:
             if self.rect.colliderect(rect):
@@ -83,7 +81,7 @@ class Champion(Entity):
 
     
     def draw(self, screen, camera):
-        if self.sprite:
+        if self.image:
             screen_x, screen_y = camera.apply(self)
             scaled_w = int(self.width * camera.zoom)
             scaled_h = int(self.height * camera.zoom)

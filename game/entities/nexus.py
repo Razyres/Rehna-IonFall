@@ -17,9 +17,9 @@ class Nexus(Entity):
         pass
     
     def draw(self, screen, camera):
-        if self.sprite:
+        if self.image:
             screen_x, screen_y = camera.apply(self)
             scaled_w = int(self.width * camera.zoom)
             scaled_h = int(self.height * camera.zoom)
-            scaled = pygame.transform.scale(self.sprite, (scaled_w, scaled_h))
+            scaled = pygame.transform.scale(self.image, (scaled_w, scaled_h))
             screen.blit(scaled, (int(screen_x), int(screen_y)))

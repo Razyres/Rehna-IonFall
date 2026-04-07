@@ -3,36 +3,29 @@ import math
 from .entity import Entity
 
 class Projectile(Entity):
-    def __init__(self, x, y, dx, dy, speed, damage, range, sprite_path):
-        super().__init__(x, y, 10, 10, None)
+    def __init__(self, x, y, dx, dy, speed, damage, projectile_range, sprite_path):
+        image = pygame.image.load(sprite_path).convert_alpha()
+        image = pygame.transform.scale(image, (2 * image.get_width(), 2 * image.get_height()))
+        super().__init__(x, y, image.get_width(), image.get_height(), image)
         self.dx = dx
         self.dy = dy
         self.speed = speed
         self.damage = damage
-        self.sprite = pygame.image.load(sprite_path)
-        self.sprite = pygame.transform.scale(self.sprite, (2 * self.sprite.get_width(), 2 * self.sprite.get_height()))
-        self.width = self.sprite.get_width()
-        self.height = self.sprite.get_height()
-        self.range = range
+        self.range = projectile_range 
 
-        
-    def update(self, event, collision_rect):
+    def update(self, dt, collision_rects):
         if self.range <= 0:
             self.alive = False
+            return
         self.range -= 1
         self.x += self.dx * self.speed
         self.y += self.dy * self.speed
-        self.rect = self.get_rect()
         self.rect.x = self.x
         self.rect.y = self.y
-        for rect in collision_rect:
+        for rect in collision_rects:
             if self.rect.colliderect(rect):
                 self.alive = False
                 break
     
     def draw(self, screen, camera):
-        screen_x, screen_y = camera.apply(self)
-        scaled_w = self.width * camera.zoom
-        scaled_h = self.height * camera.zoom
-        scaled = pygame.transform.scale(self.sprite, (int(scaled_w), int(scaled_h)))
-        screen.blit(scaled, (int(screen_x), int(screen_y)))
+        super().draw(screen, camera)

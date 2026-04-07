@@ -39,11 +39,11 @@ class Menu():
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 self.running = False
-                return None
+                return "EXIT_APP"
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     self.running = False
-                    return None
+                    return "EXIT_APP"
             if event.type == pygame.MOUSEBUTTONDOWN:
                 for i, name in enumerate(self.CHAMPIONS):
                     rect = self._portrait_rect(i)
@@ -51,6 +51,7 @@ class Menu():
                         self.selected = name
             if self.play_button.is_clicked(event):
                 if self.selected:
+                    self.running = False
                     return self.selected
                 else:
                     self.show_warning = True
