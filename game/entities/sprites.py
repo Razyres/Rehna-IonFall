@@ -29,8 +29,8 @@ class Sprite:
             else:
                 w, h = width, height
             self.sprites[direction] = pygame.transform.scale(img, (w, h))
-        self.width = self.sprites["S"].get_width()
-        self.height = self.sprites["S"].get_height()
+        self.width = w
+        self.height = h
         self.rect = pygame.Rect(0, 0, self.width, self.height)
         
     @property
