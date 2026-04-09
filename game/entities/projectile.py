@@ -12,8 +12,8 @@ class Projectile(Entity):
         self.speed = speed
         self.damage = damage
         self.range = projectile_range 
-
-    def update(self, dt, collision_rects):
+    #Nico modif arguments update ajout entities=None
+    def update(self, dt, collision_rects,entities=None):
         if self.range <= 0:
             self.alive = False
             return

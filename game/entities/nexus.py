@@ -12,8 +12,8 @@ class Nexus(Entity):
         print(f"Nexus HP : {self.hp}")
         if self.hp <= 0:
             self.alive = False
-    
-    def update(self, event, collisions):
+    #Nico modif arguments update ajout entities=None
+    def update(self, event, collisions,entities=None):
         pass
     
     def draw(self, screen, camera):

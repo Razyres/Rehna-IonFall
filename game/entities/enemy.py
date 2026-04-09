@@ -11,8 +11,8 @@ class Enemy(Entity):
         print("Enemy HP : ", self.hp)
         if self.hp <= 0:
             self.alive = False
-    
-    def update(self, event, collision_rects):
+    #Nico modif arguments update ajout entities=None
+    def update(self, event, collision_rects,entities=None):
         pass
     
     def draw(self, screen, camera):

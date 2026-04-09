@@ -13,8 +13,8 @@ class Entity(pygame.sprite.Sprite):
     
     def get_rect(self):
         return pygame.Rect(self.x, self.y, self.width, self.height)
-    
-    def update(self, event, collision_rects):
+    #Nico modif arguments update ajout entities=None
+    def update(self, event, collision_rects,entities=None):
         if self.alive == False:
             self.sprite = None
     

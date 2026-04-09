@@ -39,8 +39,8 @@ class Champion(Entity):
                 self.hp -= damage
                 self.last_hit_time = now
                 print("HP : ", self.hp)
-    
-    def update(self, event, collision_rects):
+    #Nico modif arguments update ajout entities=None
+    def update(self, event, collision_rects, entities=None):
         keys = pygame.key.get_pressed()
         dx, dy = 0, 0
         if keys[pygame.K_z] and keys[pygame.K_q]:
