@@ -14,6 +14,7 @@ class Champion(Entity):
         self.rect = self.get_rect()
         self.last_shot = 0
         self.cooldown = 300
+        self.bullet = f"{sprite_path}/bullet_{sprite_prefix}.png"
     
     def attack(self, camera):
         mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -27,7 +28,7 @@ class Champion(Entity):
         now = pygame.time.get_ticks()
         if now - self.last_shot >= self.cooldown:
             self.last_shot = now
-            return Projectile(self.x, self.y, dx/dist, dy/dist, 10, 100, 30, "sprite/bullet_0RD1N4T3UR_W.png")
+            return Projectile(self.x, self.y, dx/dist, dy/dist, 10, 100, 30, self.bullet)
         
     
     def take_damage(self, damage):
