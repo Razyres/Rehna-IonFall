@@ -4,7 +4,7 @@ import pygame
 class Nexus(Entity):
     def __init__(self, x, y, width, height, spritepath, hp=1000):
         sprite = pygame.image.load(spritepath).convert_alpha()
-        super().__init__(x, y, width, height, sprite)
+        super().__init__(x, y, width, height, sprite, hp)
         self.hp = hp
     
     def take_damage(self, damage):

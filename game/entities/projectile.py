@@ -6,7 +6,7 @@ class Projectile(Entity):
     def __init__(self, x, y, dx, dy, speed, damage, projectile_range, sprite_path):
         image = pygame.image.load(sprite_path).convert_alpha()
         image = pygame.transform.scale(image, (2 * image.get_width(), 2 * image.get_height()))
-        super().__init__(x, y, image.get_width(), image.get_height(), image)
+        super().__init__(x, y, image.get_width(), image.get_height(), image, hp=0)
         self.dx = dx
         self.dy = dy
         self.speed = speed

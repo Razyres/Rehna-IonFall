@@ -6,7 +6,7 @@ from .projectile import Projectile
 class Champion(Entity):
     def __init__(self, x, y, speed, sprite_path: str ,sprite_prefix: str, hp):
         self.sprites = Sprite(sprite_path, sprite_prefix)
-        super().__init__(x, y, self.sprites.width, self.sprites.height, self.sprites.current_sprite)
+        super().__init__(x, y, self.sprites.width, self.sprites.height, self.sprites.current_sprite, hp)
         self.speed = speed
         self.hp = hp
         self.last_hit_time = 0
