@@ -35,7 +35,7 @@ def main():
         game_result = game.run() 
         if game_result == "QUIT":
             app_running = False
-    pygame.quit()
+            pygame.quit()
     sys.exit()
 
 if __name__ == "__main__":
