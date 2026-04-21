@@ -21,8 +21,9 @@ class Entity(pygame.sprite.Sprite):
             self.sprite = None
     
     def draw_health_bar(self, screen, camera):
+        self.rect.x, self.rect.y = self.x, self.y
         if self.hp > 0:
-            screen_x, screen_y = camera.apply()
+            screen_x, screen_y = camera.apply(self)
             bar_width = int(self.width * camera.zoom)
             bar_height = max(2, int(5 * camera.zoom))#
             bar_x = screen_x

@@ -5,7 +5,7 @@ from .enemy import Enemy
 
 
 class Minion(Enemy):
-    def __init__(self, x, y, width, height, sprite,team):
+    def __init__(self, x, y, width, height, sprite, team):
         super().__init__(x, y, width, height, sprite, damage=5, hp=100)
         self.team = team
         self.target = None
@@ -60,3 +60,6 @@ class Minion(Enemy):
         if tmps - self.last_attack_time > self.attack_cooldown:
             self.target.take_damage(self.damage)
             self.last_attack_time = tmps
+    
+    def draw():
+        pass
