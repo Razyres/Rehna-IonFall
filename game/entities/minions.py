@@ -61,5 +61,5 @@ class Minion(Enemy):
             self.target.take_damage(self.damage)
             self.last_attack_time = tmps
     
-    def draw():
+    def draw(screen, camera, wtf):
         pass
