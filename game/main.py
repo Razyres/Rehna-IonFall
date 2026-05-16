@@ -11,8 +11,9 @@ from game.entities.champion import Champion
 
 CHAMPIONS_CONFIG = {
     "Ordinateur": {"sprite_prefix": "0RD1N4T3UR", "speed": 5, "hp": 100},
-    "Freud":     {"sprite_prefix": "pretresse",  "speed": 5, "hp": 120},
-    "Vagabon":   {"sprite_prefix": "Vagabon",    "speed": 5, "hp": 100}
+    "Freud":      {"sprite_prefix": "pretresse",  "speed": 5, "hp": 120},
+    "Vagabon":    {"sprite_prefix": "Vagabon",    "speed": 5, "hp": 100},
+    "Prétresse":  {"sprite_prefix": "pretresse", "speed": 5, "hp": 80}
 }
 
 def main():

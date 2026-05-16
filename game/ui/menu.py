@@ -16,7 +16,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 FONT_PATH = os.path.join(BASE_DIR, "..", "assets", "font", "Orbitron-Bold.ttf")
 
 class Menu():
-    CHAMPIONS = ["Freud" , "Ordinateur", "Vagabon"]
+    CHAMPIONS = ["Pretresse" , "Ordinateur", "Vagabon"]
     
     def __init__(self, screen):
         self.screen = screen
