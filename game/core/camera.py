@@ -1,76 +1,93 @@
 import pygame
-
+from typing import Tuple
 
 class Camera:
-    def __init__(self, screen_width, screen_height, map_width, map_height):
-        """
-        Initialise la caméra
-        
-        Args:
-            screen_width: Largeur de l'écran
-            screen_height: Hauteur de l'écran
-            map_width: Largeur de la map en pixels
-            map_height: Hauteur de la map en pixels
-        """
-        self.screen_width = screen_width
-        self.screen_height = screen_height
-        self.map_width = map_width
-        self.map_height = map_height
-        self.x = 0.0
-        self.y = 0.0
-        self.zoom = 2.0
-        self.smoothing = 0.2
+    """
+    Manages client-side viewport translations, interpolation smoothing, and zooming scaling bounds.
     
-    def follow(self, target_rect):
+    Transforms global world-space positioning vectorsinto relative localized screen space
+    pixel coordinates while clipping the lens perspective inside map layout constraints.
+    """
+    
+    def __init__(self, screen_width: int, screen_height: int, map_width: int, map_height: int):
         """
-        Suit le joueur avec un effet smooth ET respecte les limites de la map
-        
+        Initializes a new Camera tracking lens sequence.
+
         Args:
-            target_rect: pygame.Rect de l'entité à suivre
+            screen_width (int): Pixel width context of the local game application windows.
+            screen_height (int): Pixel height context of the local game application windows.
+            map_width (int): Absolute total horizontal bound of the grid arena layout.
+            map_height (int): Absolute total vertical bound of the grid arena layout
         """
+        self.screen_width: int = screen_width
+        self.screen_height: int = screen_height
+        self.map_width: int = map_width
+        self.map_height: int = map_height
+        # Absolute structural camera focal offsets (top-left coordinates of the viewpoint)
+        self.x: float = 0.0
+        self.y: float = 0.0
+        # Rendering configuration modifiers
+        self.zoom: float = 2.0
+        self.smoothing: float = 0.2 # Linear interpolation coefficient per step tick
+    
+    def follow(self, target_rect: pygame.Rect) -> None:
+        """
+        Calculates linear interpolation steps to follow a target bounding layout dynamically.
+        
+        Locks viewpoint adjustments securely inside structural map boundaries to block
+        rendering leaking outside map designs.
+
+        Args:
+            target_rect (pygame.Rect): Physics boundaries of the entity object to focus onto.
+        """
+        # Compute exact spatial geometric center points of our target
         target_center_x = target_rect.x + target_rect.width / 2.0
         target_center_y = target_rect.y + target_rect.height / 2.0
+        # Extrapolate current real visible bounding constraints under scale metrics
         visible_width = self.screen_width / self.zoom
         visible_height = self.screen_height / self.zoom
+        # Compute default baseline structural len origin position targets
         target_x = target_center_x - visible_width / 2.0
         target_y = target_center_y - visible_height / 2.0
+        # Process Horizontal Map Constraints (Clamping checks)
         if visible_width >= self.map_width:
             target_x = -(visible_width - self.map_width) / 2.0
         else:
             max_x = self.map_width - visible_width
             target_x = max(0.0, min(target_x, max_x))
-        
+        # Process Vertical Map Constraints (Clamping checks)
         if visible_height >= self.map_height:
             target_y = -(visible_height - self.map_height) / 2.0
         else:
             max_y = self.map_height - visible_height
             target_y = max(0.0, min(target_y, max_y))
+        # Apply Smooth Linear Interpolation (Lerp physics logic)
         self.x += (target_x - self.x) * self.smoothing
         self.y += (target_y - self.y) * self.smoothing
     
-    def apply(self, entity):
+    def apply(self, entity) -> Tuple[float, float]:
         """
-        Retourne la position d'une entité relative à la caméra avec le zoom
-        
+        Transforms an object's global coordinates into viewport window coordinates.
+
         Args:
-            entity: L'entité (doit avoir x, y)
-            
+            entity (_type_): Target object containing accessible 'x' and 'y' attribute states.
+
         Returns:
-            tuple: (x, y) position à l'écran
+            Tuple[float, float]: Calculated screen space X and Y positional pixels.
         """
         screen_x = (entity.x - self.x) * self.zoom
         screen_y = (entity.y - self.y) * self.zoom
         return screen_x, screen_y
     
-    def apply_rect(self, rect):
+    def apply_rect(self, rect: pygame.Rect) -> pygame.Rect:
         """
-        Applique le décalage et le zoom à un rectangle
-        
+        Transforms and scales a spatial world bounding structure into a viewport bounding box.
+
         Args:
-            rect: pygame.Rect
-            
+            rect (pygame.Rect): Bounding dimensions configured in baseline world coordinates.
+
         Returns:
-            pygame.Rect: Rectangle ajusté pour l'affichage
+            pygame.Rect: Scaled bounding frame positioned relative to local window layouts.
         """
         screen_x = (rect.x - self.x) * self.zoom
         screen_y = (rect.y - self.y) * self.zoom
@@ -78,16 +95,16 @@ class Camera:
         screen_height = rect.height * self.zoom
         return pygame.Rect(screen_x, screen_y, screen_width, screen_height)
     
-    def apply_pos(self, x, y):
+    def apply_pos(self, x: float, y: float) -> Tuple[float, float]:
         """
-        Applique le décalage et le zoom à une position
-        
+        Transforms separate primitive world coordinate floats directly into window space assets.
+
         Args:
-            x: Coordonnée x dans le monde
-            y: Coordonnée y dans le monde
-            
+            x (float): Absolute horizontal axis position within world matrix scales.
+            y (float): Absolute vertical axis position within world matrix scales.
+
         Returns:
-            tuple: (x, y) position à l'écran
+            Tuple[float, float]: Localized target coordinates mapped onto window pixels.
         """
         screen_x = (x - self.x) * self.zoom
         screen_y = (y - self.y) * self.zoom
