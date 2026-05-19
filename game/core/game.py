@@ -9,6 +9,7 @@ from game.entities.projectile import Projectile
 from game.entities.minions import Minion
 from game.entities.enemy import Enemy
 from game.ui.end_screen import EndScreen
+from game.reseau.network import Network
 
 
 class Game():
@@ -16,6 +17,8 @@ class Game():
         self.screen = screen
         self.clock = clock
         self.running = True
+        self.net = Network()
+        self.my_id = self.net.player_id
         self.all_sprites = pygame.sprite.Group()
         self.projectiles = pygame.sprite.Group()
         self.enemies = pygame.sprite.Group()
@@ -26,10 +29,8 @@ class Game():
         self.camera = Camera(screen.get_width(), screen.get_height(), self.game_map.map_width, self.game_map.map_height)
         self.collisions_rects = self.game_map.get_collision_rects()
         #Nico ajout team nexus
-        self.nexus_r = Nexus(253, 1240, 100, 100, "sprite/nexus_r.png", hp=1000)
-        self.nexus_r.team = "blue"
-        self.nexus_v = Nexus(1232, 220, 128, 128, "sprite/nexus_v.png", hp=1000)
-        self.nexus_v.team = "red"
+        self.nexus_r = Nexus(253, 1240, 100, 100, "sprite/nexus_r.png", "blue", hp=1000,)
+        self.nexus_v = Nexus(1232, 220, 128, 128, "sprite/nexus_v.png", "red", hp=1000,)
         #Nico fin
         self.add_entity(self.nexus_r, [self.nexuses])
         self.add_entity(self.nexus_v, [self.nexuses])
