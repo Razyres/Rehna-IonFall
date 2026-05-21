@@ -20,7 +20,7 @@ class Menu:
     """
     Manages the character selection screen and initialization parameters before match starts.
     """
-    CHAMPIONS: List[str] = ["Pretresse", "Ordinateur", "Vagabon"]
+    CHAMPIONS: List[str] = ["Freud", "Ordinateur", "Vagabon"]
     
     def __init__(self, screen: pygame.Surface):
         self.screen: pygame.Surface = screen
@@ -42,7 +42,7 @@ class Menu:
         
         # Load character visual items
         for name in self.CHAMPIONS:
-            path = os.path.join("sprite", f"portrait_{name.lower()}.png")
+            path = os.path.join("sprite", f"HEAD_{name}.png")
             try:
                 img = pygame.image.load(path).convert_alpha()
                 self.portraits[name] = pygame.transform.scale(img, (120, 120))

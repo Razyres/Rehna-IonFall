@@ -1,6 +1,6 @@
 import pygame
 from typing import List, Optional
-from entity import Entity
+from .entity import Entity
 
 class Nexus(Entity):
     """

@@ -21,7 +21,7 @@ class Entity(pygame.sprite.Sprite):
             sprite (pygame.Surface): The visual texture of the entity (Client-side usage).
             hp (int): The initial and maximum health points.
         """
-        super.__init__()
+        super().__init__()
         # Position and Dimension (Shared between Server and Client)
         self.x: float = x
         self.y: float = y
@@ -107,7 +107,7 @@ class Entity(pygame.sprite.Sprite):
     def draw(self, screen: pygame.Surface, camera) -> None:
         """
         Renders the entity's sprite onto the screen surface with scaling offset applied by the camera viewport.
-
+        
         Args:
             screen (pygame.Surface): The game window surface where elements are drawn.
             camera (_type_): The camera object controlling the scaling and positional offsets.
@@ -119,8 +119,8 @@ class Entity(pygame.sprite.Sprite):
             # Fetch absolute position relative to screen space using camera math
             screen_x, screen_y = camera.apply(self)
             # Apply real-time scaling factor to matching widths and heights
-            scaled_width = int(self.image.get_width() * camera.zoom)
-            scaled_height = int(self.image.get_height() * camera.zoom)
+            scaled_width = int(self.width * camera.zoom)
+            scaled_height = int(self.height * camera.zoom)
             # Draw the texture transformed to the screen surface
             scaled_sprite = pygame.transform.scale(self.image, (scaled_width, scaled_height))
             screen.blit(scaled_sprite, (screen_x, screen_y))

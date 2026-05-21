@@ -1,9 +1,9 @@
 import pygame
 import math
 from typing import List, Optional, Tuple, Dict
-from entity import Entity
-from sprites import Sprite
-from projectile import Projectile
+from .entity import Entity
+from .sprites import Sprite
+from .projectile import Projectile
 
 class Champion(Entity):
     """Represents a playable champion within the MOBA environment.
@@ -128,7 +128,7 @@ class Champion(Entity):
             if inputs.get("q"):
                 dx -= self.speed
             if inputs.get("d"):
-                self.speed
+                dx += self.speed
         # Explicit AABB Collision evaluation matrix: Axis-X
         self.rect.x = int(self.x + dx)
         for rect in collision_rects:

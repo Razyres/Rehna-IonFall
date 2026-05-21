@@ -1,7 +1,7 @@
 import pygame
 from typing import List, Optional
-from enemy import Enemy
-from entity import Entity
+from .enemy import Enemy
+from .entity import Entity
 
 class Minion(Enemy):
     """
@@ -91,7 +91,7 @@ class Minion(Enemy):
                 self.y += self.speed
         else:
             # Aggressive Engagement: Calculate approach bounds to acquired threat
-            distance = pygame.math.Vector2(self.target.x - self.x, self.target.y - self.y).lenght()
+            distance = pygame.math.Vector2(self.target.x - self.x, self.target.y - self.y).length()
             if distance > self.attack_range:
                 # Adjust spatial coordinates incrementally towards target location
                 if self.x < self.target.x:

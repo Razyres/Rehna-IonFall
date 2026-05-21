@@ -1,6 +1,6 @@
 import pygame
 from typing import List, Optional
-from entity import Entity
+from .entity import Entity
 
 class Projectile(Entity):
     """
@@ -71,7 +71,7 @@ class Projectile(Entity):
         self.rect.y = int(self.y)
         # Evaluate structural obstacle collisions (Walls/Terrain intersection points)
         for rect in collision_rects:
-            if self.rect.coolliderect(rect):
+            if self.rect.colliderect(rect):
                 self.alive = False
                 break
     

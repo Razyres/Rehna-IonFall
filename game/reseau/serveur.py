@@ -2,12 +2,12 @@ import socket
 import threading
 import pickle
 import time
-from typing import Dict, Any
 
-SERVER_IP: str = "0.0.0.0"
-PORT: int = 5555
+SERVER_IP = "0.0.0.0"
+PORT = 5555
+BUFFER_SIZE = 65536  # FIX: 64KB au lieu de 2048 — évite la troncature des game_state pickle
 
-server: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 try:
     server.bind((SERVER_IP, PORT))
 except socket.error as e:
@@ -16,39 +16,45 @@ except socket.error as e:
 server.listen(2)
 print("Authoritative Server standing by. Awaiting remote client handshakes...")
 
-# Central Authoritative Registry State Database Simulation Model
-game_state: Dict[str, Any] = {
+# Central Authoritative Registry State Database
+game_state = {
     "player_0": {"x": 120.0, "y": 1430.0, "hp": 100, "sprite_prefix": ""},
     "player_1": {"x": 1232.0, "y": 220.0, "hp": 100, "sprite_prefix": ""},
     "projectiles": [],
     "minions": []
 }
 
-def threaded_client(conn: socket.socket, player_id: int) -> None:
-    """
-    Manages continuous lifecycle sync cycles with a unique client workspace pipe.
-    """
+def threaded_client(conn, player_id):
     global game_state
-    # Send absolute identification code assignment token
+    
+    # Send player ID assignment token
     conn.send(str(player_id).encode())
     
-    # Server Tickrate lock setup: Prevents server process threads running wild
-    server_clock_delay = 1.0 / 60.0 
+    # FIX: recv du sprite_prefix — le client envoie maintenant ce message
+    try:
+        client_prefix = conn.recv(2048).decode()
+        p_key = f"player_{player_id}"
+        game_state[p_key]["sprite_prefix"] = client_prefix
+        print(f"Player {player_id} selected champion sprite prefix: {client_prefix}")
+    except Exception as e:
+        print(f"Handshake error with player {player_id}: {e}")
+        conn.close()
+        return
+
+    server_clock_delay = 1.0 / 60.0
     
     while True:
         start_time = time.time()
         try:
-            data = conn.recv(2048)
+            # FIX: buffer agrandi ici aussi pour les inputs (futurs messages plus longs)
+            data = conn.recv(BUFFER_SIZE)
             if not data:
                 print(f"Client disconnected gracefully: Session index [Player {player_id}]")
                 break
                 
-            # FIXED: Critical migration from load() stream parser to safe memory bytes loads()
-            inputs: Dict[str, bool] = pickle.loads(data)
-            p_key = f"player_{player_id}"
+            inputs = pickle.loads(data)
             speed = 5.0
             
-            # Authoritative geometric updates computation logic 
             if inputs.get("z"):
                 game_state[p_key]["y"] -= speed
             if inputs.get("s"):
@@ -58,21 +64,19 @@ def threaded_client(conn: socket.socket, player_id: int) -> None:
             if inputs.get("d"):
                 game_state[p_key]["x"] += speed
                 
-            # TODO: Integrate .tmx environmental collision rect intersection verifications checks
-            
+            # FIX: buffer agrandi pour envoyer le game_state complet sans troncature
             conn.sendall(pickle.dumps(game_state))
-        except (socket.error, pickle.PickleError, Exception) as e:
+        except Exception as e:
             print(f"Critical exception triggered servicing pipeline [Player {player_id}]: {e}")
             break
             
-        # Yield thread sleep balance to match targeted physics update rates cleanly
         execution_duration = time.time() - start_time
         if execution_duration < server_clock_delay:
             time.sleep(server_clock_delay - execution_duration)
             
     conn.close()
 
-def main() -> None:
+def main():
     current_player_count = 0
     while True:
         try:

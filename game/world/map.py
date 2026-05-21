@@ -89,7 +89,7 @@ class GameMap:
                     if cache_key in self._scaled_tile_cache:
                         scaled_tile = self._scaled_tile_cache[cache_key]
                     else:
-                        tile = self.tmx_data.get_title_image_by_gid(gid)
+                        tile = self.tmx_data.get_tile_image_by_gid(gid)
                         if tile:
                             scaled_tile = pygame.transform.scale(tile, (scaled_width, scaled_height))
                             self._scaled_tile_cache[cache_key] = scaled_tile
