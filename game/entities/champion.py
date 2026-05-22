@@ -1,9 +1,10 @@
 import pygame
 import math
-from typing import List, Optional, Tuple, Dict
+from typing import Any, List, Optional, Tuple, Dict
 from .entity import Entity
 from .sprites import Sprite
 from .projectile import Projectile
+from game.utils import resource_path
 
 class Champion(Entity):
     """Represents a playable champion within the MOBA environment.
@@ -32,18 +33,32 @@ class Champion(Entity):
             self.sprites = Sprite(sprite_path, sprite_prefix)
             width, height = self.sprites.width, self.sprites.height
             initial_surface = self.sprites.current_sprite
-            self.bullet_asset: str = f"{sprite_path}/bullet_{sprite_prefix}.png"
+            self.bullet_asset: str = resource_path(f"sprite/bullet_{sprite_prefix}.png")
         else:
             self.bullet_asset = ""
         # Initialize base Entity structures
         super().__init__(x, y, width, height, initial_surface, hp)
+        self.max_hp: int = hp
         # Gameplay Stats (server Authoritative)
         self.speed: float = speed
-        # Combat Cooldowns and Safe States(Server Authoritative)
+        # Combat Cooldowns and Safe States (Server Authoritative)
         self.last_hit_time: int = 0
-        self.next_hit_cooldown: int = 500 # Invulnerability frame padding in milliseconds
+        self.next_hit_cooldown: int = 500
         self.last_shot_time: int = 0
-        self.shot_cooldown: int = 300 # Basic attack fire rate limit in milliseconds
+        self.shot_cooldown: int = 300
+        # Ability slots (assigned from main.py per champion)
+        self.ability_q: Optional[Any] = None
+        self.ability_e: Optional[Any] = None
+        # Last movement direction used by dash abilities
+        self.last_dx: float = 0.0
+        self.last_dy: float = 0.0
+        # Curse state (applied by Vagabon's E — doubles incoming damage for a duration)
+        self.curse_multiplier: float = 1.0
+        self.curse_end_ms: int = 0
+        # Team attribution (assigned from network player_id : 0=blue, 1=red)
+        self.team: str = ""
+        # Pending heal to report to server (set by make_heal ability)
+        self.pending_heal: int = 0
     
     def process_attack_intent(self, world_mouse_x: float, world_mouse_y: float) -> Optional[Projectile]:
         """
@@ -68,7 +83,7 @@ class Champion(Entity):
         if current_time - self.last_shot_time >= self.shot_cooldown:
             self.last_shot_time = current_time
             # Instantiate a generic projectile context on server (Asset path provided for clients later)
-            return Projectile(self.x, self.y, dx / distance, dy / distance, 10, 100, 30, self.bullet_asset)
+            return Projectile(self.x, self.y, dx / distance, dy / distance, 10, 30, 30, self.bullet_asset)
         return None
     
     def take_damage(self, damage: int) -> None:
@@ -147,6 +162,9 @@ class Champion(Entity):
                 if dy < 0:
                     self.rect.top = rect.bottom
         self.y = float(self.rect.y)
+        if dx != 0 or dy != 0:
+            self.last_dx = dx
+            self.last_dy = dy
         if inputs.get("b"):
             print(f"{self.x}, {self.y}")
         return dx, dy

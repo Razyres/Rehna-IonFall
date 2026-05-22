@@ -1,7 +1,7 @@
 import pygame
-import os
 from typing import List, Dict, Optional, Tuple
 from .button import Button
+from game.utils import resource_path
 
 BACKGROUND: Tuple[int, int, int] = (8, 8, 20)
 ACCENT_CYAN: Tuple[int, int, int] = (80, 220, 255)
@@ -13,8 +13,7 @@ BUTTON_PLAY_HOVER: Tuple[int, int, int] = (140, 60, 220)
 TEXT_COLOR: Tuple[int, int, int] = (220, 220, 255)
 WARNING_COLOR: Tuple[int, int, int] = (255, 80, 180)
 
-BASE_DIR: str = os.path.dirname(os.path.abspath(__file__))
-FONT_PATH: str = os.path.abspath(os.path.join(BASE_DIR, "..", "assets", "font", "Orbitron-Bold.ttf"))
+FONT_PATH: str = resource_path("game/assets/font/Orbitron-Bold.ttf")
 
 class Menu:
     """
@@ -42,7 +41,7 @@ class Menu:
         
         # Load character visual items
         for name in self.CHAMPIONS:
-            path = os.path.join("sprite", f"HEAD_{name}.png")
+            path = resource_path(f"sprite/HEAD_{name}.png")
             try:
                 img = pygame.image.load(path).convert_alpha()
                 self.portraits[name] = pygame.transform.scale(img, (120, 120))
@@ -159,7 +158,49 @@ class Menu:
                         ip_text += event.unicode
             self._draw_ip_input(ip_text)
 
-    def run(self) -> Tuple[Optional[str], str]:
+    def _draw_mode_select(self, host_btn: Button, join_btn: Button) -> None:
+        self.screen.fill(BACKGROUND)
+        sw, sh = self.screen.get_width(), self.screen.get_height()
+
+        title = self.font_title.render("MODE DE JEU", True, ACCENT_PURPLE)
+        self.screen.blit(title, title.get_rect(centerx=sw // 2, y=80))
+
+        sub_host = self.font_small.render("Cree et heberge une partie sur ce PC", True, TEXT_COLOR)
+        self.screen.blit(sub_host, sub_host.get_rect(centerx=sw // 2, y=sh // 2 - 100))
+
+        host_btn.draw(self.screen)
+
+        sub_join = self.font_small.render("Rejoindre une partie existante (entrer l'IP)", True, TEXT_COLOR)
+        self.screen.blit(sub_join, sub_join.get_rect(centerx=sw // 2, y=sh // 2 + 10))
+
+        join_btn.draw(self.screen)
+
+        hint = self.font_small.render("ECHAP pour retour", True, (120, 120, 160))
+        self.screen.blit(hint, hint.get_rect(centerx=sw // 2, y=sh - 100))
+
+        pygame.display.flip()
+
+    def _run_mode_select(self) -> Optional[str]:
+        """Returns 'host', 'join', or None (back to champion select)."""
+        sw, sh = self.screen.get_width(), self.screen.get_height()
+        host_btn = Button(sw // 2 - 160, sh // 2 - 70, 320, 55, "HEBERGER", BUTTON_PLAY, BUTTON_PLAY_HOVER)
+        join_btn = Button(sw // 2 - 160, sh // 2 + 55, 320, 55, "REJOINDRE", BUTTON_COLOR, BUTTON_HOVER)
+        while True:
+            self.clock.tick(60)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    return None
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        return None
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if host_btn.is_clicked(event):
+                        return "host"
+                    if join_btn.is_clicked(event):
+                        return "join"
+            self._draw_mode_select(host_btn, join_btn)
+
+    def run(self) -> Tuple[Optional[str], str, bool]:
         while True:
             # Phase 1: champion selection
             self.running = True
@@ -170,8 +211,14 @@ class Menu:
                 self.handle_events()
                 self.draw()
             if not self.selected:
-                return None, ""
-            # Phase 2: IP input — ESC goes back to champion selection
+                return None, "", False
+            # Phase 2: mode selection — ESC goes back to champion selection
+            mode = self._run_mode_select()
+            if mode is None:
+                continue
+            if mode == "host":
+                return self.selected, "127.0.0.1", True
+            # Phase 3: IP input — ESC goes back to mode selection
             ip = self._run_ip_input()
             if ip is not None:
-                return self.selected, ip
+                return self.selected, ip, False

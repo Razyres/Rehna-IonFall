@@ -1,8 +1,11 @@
 import pygame
 import re
 import glob
+import os
 from pathlib import Path
 from typing import List, Dict, Tuple, Optional
+
+from game.utils import resource_path
 
 class Sprite:
     """
@@ -30,6 +33,8 @@ class Sprite:
         self.sprites: Dict[str, pygame.Surface] = {}
         self.direction: str = "S"
         w, h = 32, 32 # Stable structural fallbacks to prevent variable bounds leaks
+        if not os.path.isabs(sprite_folder):
+            sprite_folder = resource_path(sprite_folder)
         for direction in self.DIRECTIONS:
             # Pattern matching lookup variant A: Frame counting parameters (* notation)
             pattern = str(Path(sprite_folder) / f"{sprite_prefix}_{direction}_*.png")
