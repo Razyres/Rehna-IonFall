@@ -6,6 +6,7 @@ from typing import List, Optional, Any
 from game.world.map import GameMap
 from game.core.camera import Camera
 from game.entities.nexus import Nexus
+from game.entities.tower import Tower
 from game.entities.projectile import Projectile
 from game.entities.minions import Minion
 from game.entities.champion import Champion
@@ -64,6 +65,13 @@ class Game:
         self.nexus_v = Nexus(1220, 239, 140, 140, nexus_v_i, "red", hp=1000)
         self.add_entity(self.nexus_r, [self.nexuses])
         self.add_entity(self.nexus_v, [self.nexuses])
+        # Towers
+        self.towers = pygame.sprite.Group()
+        self.tower_img = pygame.image.load("sprite/tourelle_bleue.png").convert_alpha()
+        blue_tower = Tower(450, 1050, self.tower_img, "blue", hp= 500)
+        self.add_entity(blue_tower, [self.towers])
+        red_tower = Tower(1000, 400, self.tower_img, "red", hp=500)
+        self.add_entity(red_tower, [self.towers])
 
         # Player is injected directly in game.py from main.py
         self.player: Optional[Champion] = None
