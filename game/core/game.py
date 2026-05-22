@@ -69,10 +69,14 @@ class Game:
         # Towers
         self.towers = pygame.sprite.Group()
         self.tower_img = pygame.image.load("sprite/tourelle_bleue.png").convert_alpha()
-        blue_tower = Tower(450, 1050, self.tower_img, "blue", hp= 500)
-        self.add_entity(blue_tower, [self.towers])
-        red_tower = Tower(1000, 400, self.tower_img, "red", hp=500)
-        self.add_entity(red_tower, [self.towers])
+        blue_tower_t1 = Tower(400, 1050, self.tower_img, "blue", hp= 500)
+        self.add_entity(blue_tower_t1, [self.towers])
+        blue_tower_t2 = Tower(570, 800, self.tower_img, "blue", hp= 500)
+        self.add_entity(blue_tower_t2, [self.towers])
+        red_tower_t1 = Tower(1100, 535, self.tower_img, "red", hp=500)
+        self.add_entity(red_tower_t1, [self.towers])
+        red_tower_t2 = Tower(950, 640, self.tower_img, "red", hp=500)
+        self.add_entity(red_tower_t2, [self.towers])
 
         # Player is injected directly in game.py from main.py
         self.player: Optional[Champion] = None
