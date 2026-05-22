@@ -121,9 +121,57 @@ class Menu:
             
         pygame.display.flip()
 
-    def run(self) -> Optional[str]:
-        while self.running:
-            self.clock.tick(60)  # Standard safety framerate lock
-            self.handle_events()
-            self.draw()
-        return self.selected
+    def _draw_ip_input(self, ip_text: str) -> None:
+        self.screen.fill(BACKGROUND)
+        sw, sh = self.screen.get_width(), self.screen.get_height()
+
+        title = self.font_title.render("CONNEXION AU SERVEUR", True, ACCENT_PURPLE)
+        self.screen.blit(title, title.get_rect(centerx=sw // 2, y=80))
+
+        label = self.font.render("IP du serveur :", True, TEXT_COLOR)
+        self.screen.blit(label, label.get_rect(centerx=sw // 2, y=sh // 2 - 70))
+
+        box_rect = pygame.Rect(sw // 2 - 220, sh // 2 - 30, 440, 55)
+        pygame.draw.rect(self.screen, BUTTON_COLOR, box_rect, border_radius=8)
+        pygame.draw.rect(self.screen, ACCENT_CYAN, box_rect, 2, border_radius=8)
+        ip_surf = self.font.render(ip_text + "|", True, ACCENT_CYAN)
+        self.screen.blit(ip_surf, ip_surf.get_rect(center=box_rect.center))
+
+        hint = self.font_small.render("ENTREE pour connecter   |   ECHAP pour retour", True, TEXT_COLOR)
+        self.screen.blit(hint, hint.get_rect(centerx=sw // 2, y=sh // 2 + 60))
+        pygame.display.flip()
+
+    def _run_ip_input(self) -> Optional[str]:
+        ip_text = "127.0.0.1"
+        while True:
+            self.clock.tick(60)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    return None
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        return None
+                    elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                        return ip_text if ip_text else "127.0.0.1"
+                    elif event.key == pygame.K_BACKSPACE:
+                        ip_text = ip_text[:-1]
+                    elif event.unicode in "0123456789.":
+                        ip_text += event.unicode
+            self._draw_ip_input(ip_text)
+
+    def run(self) -> Tuple[Optional[str], str]:
+        while True:
+            # Phase 1: champion selection
+            self.running = True
+            self.selected = None
+            self.show_warning = False
+            while self.running:
+                self.clock.tick(60)
+                self.handle_events()
+                self.draw()
+            if not self.selected:
+                return None, ""
+            # Phase 2: IP input — ESC goes back to champion selection
+            ip = self._run_ip_input()
+            if ip is not None:
+                return self.selected, ip

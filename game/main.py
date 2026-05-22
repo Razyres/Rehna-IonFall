@@ -32,16 +32,15 @@ def main() -> None:
     
     while app_running:
         menu = Menu(screen)
-        chosen_champion = menu.run()
-        
+        chosen_champion, server_ip = menu.run()
+
         if not chosen_champion:
             app_running = False
             break
-            
+
         config = CHAMPIONS_CONFIG[chosen_champion]
 
-        # FIX: passer sprite_prefix à Game pour que Network l'envoie au serveur lors du handshake
-        game = Game(screen, clock, sprite_prefix=config["sprite_prefix"])
+        game = Game(screen, clock, sprite_prefix=config["sprite_prefix"], server_ip=server_ip)
 
         # FIX: spawn dynamique selon l'ID réseau reçu du serveur (0 = bas, 1 = haut)
         # Fallback sur le spawn joueur 0 si la connexion a échoué (my_id = None)

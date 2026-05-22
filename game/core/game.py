@@ -22,7 +22,7 @@ class Game:
     and drives the rendering viewport pipeline.
     """
     
-    def __init__(self, screen: pygame.Surface, clock: pygame.time.Clock, sprite_prefix: str = "Vagabon"):
+    def __init__(self, screen: pygame.Surface, clock: pygame.time.Clock, sprite_prefix: str = "Vagabon", server_ip: str = "127.0.0.1"):
         """
         Initializes a new Game management sequence.
 
@@ -36,13 +36,14 @@ class Game:
         self.running: bool = True
 
         # Network Engine — sprite_prefix transmis pour le handshake complet
-        self.net: Network = Network(sprite_prefix=sprite_prefix)
+        self.net: Network = Network(sprite_prefix=sprite_prefix, server_ip=server_ip)
         self.my_id: Any = self.net.player_id
 
         # Entity Pipeline Containers
         self.all_sprites: pygame.sprite.Group = pygame.sprite.Group()
         self.projectiles: pygame.sprite.Group = pygame.sprite.Group()
         self.enemies: pygame.sprite.Group = pygame.sprite.Group()
+        self.remote_players: pygame.sprite.Group = pygame.sprite.Group()
         self.nexuses: pygame.sprite.Group = pygame.sprite.Group()
 
         # Map Layout and Collision Processing
@@ -171,24 +172,28 @@ class Game:
                 # Ne pas resynchroniser sa propre position — le client est autoritaire sur soi-même
                 if pid == self.my_id:
                     continue
-                # Chercher le champion adverse déjà spawné
-                found_enemy = None
-                for enemy_sprite in self.enemies:
-                    if getattr(enemy_sprite, "player_id", None) == pid:
-                        found_enemy = enemy_sprite
+                # Chercher le champion adverse déjà spawné dans remote_players
+                found = None
+                for rp in self.remote_players:
+                    if getattr(rp, "player_id", None) == pid:
+                        found = rp
                         break
-                if found_enemy:
-                    # Mettre à jour sa position depuis le serveur
-                    found_enemy.x = player_data["x"]
-                    found_enemy.y = player_data["y"]
-                    found_enemy.rect.x = int(found_enemy.x)
-                    found_enemy.rect.y = int(found_enemy.y)
+                if found:
+                    # Calculer le déplacement pour animer le sprite dans la bonne direction
+                    old_x, old_y = found.x, found.y
+                    found.x = player_data["x"]
+                    found.y = player_data["y"]
+                    found.rect.x = int(found.x)
+                    found.rect.y = int(found.y)
+                    rdx = found.x - old_x
+                    rdy = found.y - old_y
+                    found.update_client_animation(rdx, rdy)
                 else:
-                    # Premier frame : spawn du champion adverse
+                    # Premier frame : spawn du champion adverse comme Champion
                     opp_prefix = player_data.get("sprite_prefix") or "Vagabon"
                     opponent = Champion(player_data["x"], player_data["y"], 5, "sprite", opp_prefix, 100)
                     opponent.player_id = pid
-                    self.enemies.add(opponent)
+                    self.remote_players.add(opponent)
                     self.all_sprites.add(opponent)
 
         # --- 4. Spawn des vagues de minions ---
@@ -209,12 +214,19 @@ class Game:
             proj.update_server_state(self.collisions_rects)
             if not proj.alive:
                 continue
-            # Collision projectile → champion/minion ennemi
+            # Collision projectile → minions ennemis
             for enemy in list(self.enemies):
                 if proj.rect.colliderect(enemy.rect):
                     enemy.take_damage(proj.damage)
                     proj.alive = False
                     break
+            # Collision projectile → champion adverse
+            if proj.alive:
+                for rp in list(self.remote_players):
+                    if proj.rect.colliderect(rp.rect):
+                        rp.take_damage(proj.damage)
+                        proj.alive = False
+                        break
             # Collision projectile → nexus rouge (cible du joueur bleu)
             if proj.alive and proj.rect.colliderect(self.nexus_v.rect):
                 self.nexus_v.take_damage(proj.damage)
@@ -250,6 +262,96 @@ class Game:
             entity.draw(self.screen, self.camera)
         pygame.display.flip()
     
+    def _wait_for_players(self) -> bool:
+        BG          = (8,   8,  20)
+        CYAN        = (80, 220, 255)
+        PURPLE      = (180,  80, 255)
+        TEXT        = (220, 220, 255)
+        SLOT_COLOR  = (40,  40,  80)
+        SLOT_ACTIVE = (30,  60, 100)
+        DIM         = (80,  80, 100)
+
+        font_path = str(Path(__file__).parent.parent / "assets" / "font" / "Orbitron-Bold.ttf")
+        try:
+            f_title  = pygame.font.Font(font_path, 46)
+            f_label  = pygame.font.Font(font_path, 22)
+            f_champ  = pygame.font.Font(font_path, 28)
+            f_hint   = pygame.font.Font(font_path, 20)
+        except (FileNotFoundError, OSError):
+            f_title  = pygame.font.SysFont("sans-serif", 46, bold=True)
+            f_label  = pygame.font.SysFont("sans-serif", 22, bold=True)
+            f_champ  = pygame.font.SysFont("sans-serif", 28, bold=True)
+            f_hint   = pygame.font.SysFont("sans-serif", 20)
+
+        dot_count = 0
+        dot_timer = 0
+        dummy_inputs = {"z": False, "q": False, "s": False, "d": False, "b": False}
+        sw, sh = self.screen.get_width(), self.screen.get_height()
+
+        while True:
+            dt_ms = self.clock.tick(15)
+            dot_timer += dt_ms
+            if dot_timer >= 500:
+                dot_count = (dot_count + 1) % 4
+                dot_timer = 0
+
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    return False
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_ESCAPE:
+                    return False
+
+            state = self.net.send(dummy_inputs)
+            if state and state.get("ready"):
+                return True
+
+            # --- Draw ---
+            self.screen.fill(BG)
+
+            # Title
+            title_surf = f_title.render("EN ATTENTE...", True, PURPLE)
+            self.screen.blit(title_surf, title_surf.get_rect(centerx=sw // 2, y=80))
+
+            # Two player slots side by side
+            slot_w, slot_h = 320, 180
+            gap = 60
+            left_x  = sw // 2 - slot_w - gap // 2
+            right_x = sw // 2 + gap // 2
+            slot_y  = sh // 2 - slot_h // 2
+
+            for i, slot_x in enumerate((left_x, right_x)):
+                key = f"player_{i}"
+                prefix = state[key]["sprite_prefix"] if state else ""
+                connected = bool(prefix)
+                is_me = (i == self.my_id)
+
+                slot_rect = pygame.Rect(slot_x, slot_y, slot_w, slot_h)
+                color = SLOT_ACTIVE if connected else SLOT_COLOR
+                pygame.draw.rect(self.screen, color, slot_rect, border_radius=10)
+                border_col = CYAN if connected else DIM
+                pygame.draw.rect(self.screen, border_col, slot_rect, 2, border_radius=10)
+
+                # Player label
+                me_tag = "  (VOUS)" if is_me else ""
+                label = f_label.render(f"JOUEUR {i + 1}{me_tag}", True, CYAN if is_me else TEXT)
+                self.screen.blit(label, label.get_rect(centerx=slot_rect.centerx, y=slot_y + 20))
+
+                # Champion or waiting dots
+                if connected:
+                    champ_surf = f_champ.render(prefix.upper(), True, CYAN)
+                    self.screen.blit(champ_surf, champ_surf.get_rect(centerx=slot_rect.centerx, centery=slot_rect.centery + 10))
+                    check = f_label.render("CONNECTE", True, CYAN)
+                    self.screen.blit(check, check.get_rect(centerx=slot_rect.centerx, y=slot_y + slot_h - 42))
+                else:
+                    dots = "." * dot_count
+                    wait_surf = f_label.render(f"EN ATTENTE{dots}", True, DIM)
+                    self.screen.blit(wait_surf, wait_surf.get_rect(centerx=slot_rect.centerx, centery=slot_rect.centery + 10))
+
+            hint = f_hint.render("ECHAP pour quitter", True, DIM)
+            self.screen.blit(hint, hint.get_rect(centerx=sw // 2, y=sh - 80))
+
+            pygame.display.flip()
+
     def run(self) -> str:
         """
         Maintains the operational application loop sequence runtime.
@@ -257,6 +359,9 @@ class Game:
         Returns:
             str: Game outcome state flag identifier ('VICTORY', 'DEFEAT', or 'QUIT').
         """
+        if not self._wait_for_players():
+            return "QUIT"
+
         while self.running:
             # dt_ms : millisecondes brutes pour spawn_timer ; dt : secondes pour wave_timer
             self.dt_ms = self.clock.tick(60)
