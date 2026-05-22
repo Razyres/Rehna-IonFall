@@ -46,6 +46,11 @@ class Projectile(Entity):
         self.speed: float = speed
         self.damage: int = damage
         self.range: int = projectile_range
+        # Optional curse payload (set by make_curse ability)
+        self.is_curse: bool = False
+        self.curse_duration_ms: int = 0
+        # Team of the player who fired this projectile
+        self.team: str = ""
     
     def update_server_state(self, collision_rects: List[pygame.Rect], entities: Optional[List[Entity]] = None) -> None:
         """
