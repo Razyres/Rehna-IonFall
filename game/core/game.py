@@ -65,7 +65,7 @@ class Game:
         self.add_entity(self.nexus_r, [self.nexuses])
         self.add_entity(self.nexus_v, [self.nexuses])
 
-        # Le joueur est créé et injecté depuis main.py via game.player = player + game.add_entity(player)
+        # Player is injected directly in game.py from main.py
         self.player: Optional[Champion] = None
         self.dt: float = 0.0
         self.dt_ms: float = 0.0
@@ -129,7 +129,6 @@ class Game:
                 self.add_entity(blue_minion, [self.enemies])
                 red_minion = Minion(1232, 220, 32, 32, self.red_minion_img, "red")
                 self.add_entity(red_minion, [self.enemies])
-                # FIX: += 1 et non += 12 — on spawn une paire par tick
                 self.minions_spawned_in_wave += 1
                 self.spawn_timer = 0
         elif self.minions_spawned_in_wave >= self.wave_size:
@@ -145,16 +144,17 @@ class Game:
         Executes real-time physics tracking, boundary constraint evaluations,
         and entity death cleanup sweeps.
         """
-        # --- 1. Collecte des inputs locaux ---
+        # --- 1. Collecting locals inputs ---
         keys = pygame.key.get_pressed()
         inputs = {
             "z": keys[pygame.K_z],
             "q": keys[pygame.K_q],
             "s": keys[pygame.K_s],
-            "d": keys[pygame.K_d]
+            "d": keys[pygame.K_d],
+            "b": keys[pygame.K_b]
         }
 
-        # --- 2. Mouvement du joueur local avec collisions ---
+        # --- 2. Player movements with collisions ---
         # update_server_state() calcule le déplacement AABB et retourne dx/dy pour l'animation
         dx, dy = 0.0, 0.0
         if self.player is not None and self.player.alive:

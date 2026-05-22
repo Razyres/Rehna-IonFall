@@ -19,7 +19,7 @@ print("Authoritative Server standing by. Awaiting remote client handshakes...")
 # Central Authoritative Registry State Database
 game_state = {
     "player_0": {"x": 120.0, "y": 1430.0, "hp": 100, "sprite_prefix": ""},
-    "player_1": {"x": 1232.0, "y": 220.0, "hp": 100, "sprite_prefix": ""},
+    "player_1": {"x": 1459.0, "y": 109.0, "hp": 100, "sprite_prefix": ""},
     "projectiles": [],
     "minions": []
 }

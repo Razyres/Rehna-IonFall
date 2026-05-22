@@ -92,7 +92,7 @@ class Menu:
         self.screen.fill(BACKGROUND)
         
         # Draw game identity headers
-        title = self.font_title.render("NEO-MOBA SELECTION", True, ACCENT_PURPLE)
+        title = self.font_title.render("BIENVENUE DANS IONFALL", True, ACCENT_PURPLE)
         self.screen.blit(title, title.get_rect(centerx=self.screen.get_width() // 2, y=80))
         
         # Display available entity cards
