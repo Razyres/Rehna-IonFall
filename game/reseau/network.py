@@ -12,15 +12,16 @@ class Network:
     
     BUFFER_SIZE: int = 65536  # 64KB — suffisant pour un game_state pickle complet
     
-    def __init__(self, sprite_prefix: str = "Vagabon"):
+    def __init__(self, sprite_prefix: str = "Vagabon", server_ip: str = "127.0.0.1"):
         """
         Initializes a new network connection bridge interface.
 
         Args:
             sprite_prefix (str): The champion sprite prefix to send to the server during handshake.
+            server_ip (str): IP address of the game server to connect to.
         """
         self.client: socket.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.server: str = "127.0.0.1"
+        self.server: str = server_ip
         self.port: int = 5555
         self.addr: Tuple[str, int] = (self.server, self.port)
         self.sprite_prefix: str = sprite_prefix
