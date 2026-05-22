@@ -68,6 +68,7 @@ class Game:
         # Le joueur est créé et injecté depuis main.py via game.player = player + game.add_entity(player)
         self.player: Optional[Champion] = None
         self.dt: float = 0.0
+        self.dt_ms: float = 0.0
 
         # Minion Wave Spawner
         self.spawn_timer: float = 0.0
@@ -121,7 +122,7 @@ class Game:
         """
         Calculates delta steps to execute procedural lane minion wave deployments.
         """
-        self.spawn_timer += self.dt * 1000
+        self.spawn_timer += self.dt_ms
         if self.is_wave_active and self.minions_spawned_in_wave < self.wave_size:
             if self.spawn_timer > 800:
                 blue_minion = Minion(253, 1240, 32, 32, self.blue_minion_img, "blue")
@@ -257,6 +258,9 @@ class Game:
             str: Game outcome state flag identifier ('VICTORY', 'DEFEAT', or 'QUIT').
         """
         while self.running:
+            # dt_ms : millisecondes brutes pour spawn_timer ; dt : secondes pour wave_timer
+            self.dt_ms = self.clock.tick(60)
+            self.dt = self.dt_ms / 1000.0
             self.handle_event()
             self.update()
             self.draw()
@@ -264,8 +268,6 @@ class Game:
                 winner = "VICTORY" if not self.nexus_v.alive else "DEFEAT"
                 end = EndScreen(self.screen, winner)
                 end.draw()
-                # FIX: end.run() avec parenthèses — c'est une méthode
                 result = end.run()
                 return result
-            self.clock.tick()
         return "QUIT"
