@@ -54,7 +54,7 @@ def _direction_to_mouse(champ: Any, mx: float, my: float):
 
 def make_heal(cooldown_ms: int = 10000, hp_restore: int = 30) -> Ability:
     def execute(champ, mx, my):
-        champ.pending_heal = hp_restore  # Server applies the heal authoritatively
+        champ.pending_heal += hp_restore  # Server applies the heal authoritatively
         return []
     return Ability("Soin", "E", cooldown_ms, execute)
 
@@ -65,7 +65,7 @@ def make_heavy_shot(cooldown_ms: int = 5000, damage: int = 60, speed: float = 6.
         ndx, ndy = _direction_to_mouse(champ, mx, my)
         if ndx is None:
             return []
-        proj = Projectile(champ.x, champ.y, ndx, ndy, speed, damage, 50, champ.bullet_asset)
+        proj = Projectile(champ.x, champ.y, ndx, ndy, speed, int(damage * champ.damage_multiplier), 50, champ.bullet_asset)
         return [proj]
     return Ability("Impact", "R", cooldown_ms, execute)
 
@@ -92,9 +92,10 @@ def make_burst(cooldown_ms: int = 6000, damage: int = 20, count: int = 5) -> Abi
         base_angle = math.atan2(ndy, ndx)
         spread = math.pi / 5
         projs = []
+        scaled_dmg = int(damage * champ.damage_multiplier)
         for i in range(count):
             angle = base_angle + spread * (i - count // 2) / max(count - 1, 1)
-            projs.append(Projectile(champ.x, champ.y, math.cos(angle), math.sin(angle), 10, damage, 30, champ.bullet_asset))
+            projs.append(Projectile(champ.x, champ.y, math.cos(angle), math.sin(angle), 10, scaled_dmg, 30, champ.bullet_asset))
         return projs
     return Ability("IEM", "R", cooldown_ms, execute)
 
@@ -105,7 +106,7 @@ def make_curse(cooldown_ms: int = 7000, damage: int = 15, duration_ms: int = 400
         ndx, ndy = _direction_to_mouse(champ, mx, my)
         if ndx is None:
             return []
-        proj = Projectile(champ.x, champ.y, ndx, ndy, 5, damage, 60, champ.bullet_asset)
+        proj = Projectile(champ.x, champ.y, ndx, ndy, 5, int(damage * champ.damage_multiplier), 60, champ.bullet_asset)
         proj.is_curse = True
         proj.curse_duration_ms = duration_ms
         return [proj]

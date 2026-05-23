@@ -3,6 +3,9 @@ from typing import List, Optional
 from .enemy import Enemy
 from .entity import Entity
 
+AGGRO_RANGE = 200.0
+LEASH_RANGE = 400.0
+
 class Minion(Enemy):
     """
     Represents an automated lane minion (creep) within MOBA environment.
@@ -29,6 +32,9 @@ class Minion(Enemy):
         # Operational parameters and alignement (Shared/Authoritative)
         self.team: str = team
         self.target: Optional[Entity] = None
+        # Leash anchor — the position from which max chase distance is measured
+        self.spawn_x: float = x
+        self.spawn_y: float = y
         # Combat and movement profiles (Server enforcement stats)
         self.speed: float = 2.0
         self.attack_range: float = 50.0
@@ -38,7 +44,7 @@ class Minion(Enemy):
     def update_server_state(self, collision_rects: List[pygame.Rect], entities: Optional[List[Entity]] = None) -> None:
         """
         Processes the minion's behavior loop on the server instance.
-        
+
         Evaluates targeting contexts, modifies coordinates via pathfinding algorithms,
         and updates the mechanical bounding box variables. This logic never invokes
         any graphical modules
@@ -53,61 +59,96 @@ class Minion(Enemy):
             return
         # Core AI sequential routine execution (Server-side exclusive)
         self._decide_action(entities)
-        self._move_or_attack()
+        self._move_or_attack(collision_rects)
     
     def _decide_action(self, entities: List[Entity]) -> None:
-        """
-        Scans nearby space to acquire or update the active operational target.
-        
-        Validates target survival states and searches for the closest hostile unit
-        within an aggressive acquisition range.
-
-        Args:
-            entities (List[Entity]): Current collectionof world objects active on the server loop.
-        """
-        # Clear reference if the previous target died during past tick updates
-        if self.target and not self.target.alive:
+        # Drop dead target
+        if self.target is not None and not self.target.alive:
             self.target = None
-        # Scan world listings for elligible enemy alignements inside an aggro range of 150 units
+
+        # Leash: stop chasing a non-minion (champion) if too far from spawn anchor
+        if self.target is not None and not isinstance(self.target, Minion):
+            dist_from_spawn = pygame.math.Vector2(self.x - self.spawn_x, self.y - self.spawn_y).length()
+            if dist_from_spawn > LEASH_RANGE:
+                self.target = None
+
+        # Sticky: keep current target — never switch while it's alive and in leash
+        if self.target is not None:
+            return
+
+        # Acquire new target: enemy minions have priority over champions/objectives
+        best_minion: Optional[Entity] = None
+        best_minion_dist = float('inf')
+        best_other: Optional[Entity] = None
+        best_other_dist = float('inf')
+
         for entity in entities:
-            if hasattr(entity, 'team') and entity.team != self.team and entity.alive:
-                #Calculate vector distance magnitude
-                distance = pygame.math.Vector2(entity.x - self.x, entity.y - self.y).length()
-                if distance <150.0:
-                    self.target= entity
-                    break
+            if not (hasattr(entity, 'team') and entity.team != self.team and entity.alive):
+                continue
+            dist = pygame.math.Vector2(entity.x - self.x, entity.y - self.y).length()
+            if dist >= AGGRO_RANGE:
+                continue
+            if isinstance(entity, Minion):
+                if dist < best_minion_dist:
+                    best_minion_dist = dist
+                    best_minion = entity
+            else:
+                if dist < best_other_dist:
+                    best_other_dist = dist
+                    best_other = entity
+
+        self.target = best_minion if best_minion is not None else best_other
     
-    def _move_or_attack(self) -> None:
+    def _move_or_attack(self, collision_rects: List[pygame.Rect]) -> None:
         """
         Manages directional movement pathing or shifts states into active combat routines.
         """
+        dx, dy = 0.0, 0.0
+
         if self.target is None:
             # Neutral Lane Pushing: Path diagonally across the map towards opposing bases
             if self.team == "blue":
-                self.x += self.speed
-                self.y -= self.speed
+                dx = self.speed
+                dy = -self.speed
             else:
-                self.x -= self.speed
-                self.y += self.speed
+                dx = -self.speed
+                dy = self.speed
         else:
             # Aggressive Engagement: Calculate approach bounds to acquired threat
             distance = pygame.math.Vector2(self.target.x - self.x, self.target.y - self.y).length()
             if distance > self.attack_range:
-                # Adjust spatial coordinates incrementally towards target location
                 if self.x < self.target.x:
-                    self.x += self.speed
+                    dx += self.speed
                 if self.x > self.target.x:
-                    self.x -= self.speed
+                    dx -= self.speed
                 if self.y < self.target.y:
-                    self.y += self.speed
+                    dy += self.speed
                 if self.y > self.target.y:
-                    self.y -= self.speed
+                    dy -= self.speed
             else:
                 # Target within parameters, trigger operational weapon calculations
                 self._execute_attack()
-        # Synchronize physics engine positioning coordinates
-        self.rect.x = int(self.x)
-        self.rect.y = int(self.y)
+                return
+
+        # AABB collision — X axis
+        self.rect.x = int(self.x + dx)
+        for rect in collision_rects:
+            if self.rect.colliderect(rect):
+                if dx > 0:
+                    self.rect.right = rect.left
+                elif dx < 0:
+                    self.rect.left = rect.right
+        self.x = float(self.rect.x)
+
+        # AABB collision — Y axis
+        self.rect.y = int(self.y + dy)
+        for rect in collision_rects:
+            if self.rect.colliderect(rect):
+                if dy > 0:
+                    self.rect.bottom = rect.top
+                elif dy < 0:
+                    self.rect.top = rect.bottom
+        self.y = float(self.rect.y)
     
     def _execute_attack(self) -> None: 
         """

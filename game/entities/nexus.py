@@ -45,7 +45,6 @@ class Nexus(Entity):
             return
         #Deduct health metrics via parent class mechanics
         super().take_damage(damage)
-        print(f"Nexus [{self.team.upper()}] HP : {self.hp}")
     
     def update_server_state(self, collision_rects: List[pygame.Rect], entities: Optional[List[Entity]] = None) -> None:
         """

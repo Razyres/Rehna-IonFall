@@ -6,6 +6,11 @@ from .sprites import Sprite
 from .projectile import Projectile
 from game.utils import resource_path
 
+_XP_TO_NEXT = (100, 180, 280, 400)  # XP to level up, indexed by (level - 1)
+_HP_PER_LEVEL = 15
+_DMG_PER_LEVEL = 0.10
+MAX_LEVEL = 5
+
 class Champion(Entity):
     """Represents a playable champion within the MOBA environment.
     
@@ -57,8 +62,12 @@ class Champion(Entity):
         self.curse_end_ms: int = 0
         # Team attribution (assigned from network player_id : 0=blue, 1=red)
         self.team: str = ""
-        # Pending heal to report to server (set by make_heal ability)
+        # Pending heal to report to server (set by make_heal ability or level-up)
         self.pending_heal: int = 0
+        # XP and leveling
+        self.level: int = 1
+        self.xp: int = 0
+        self.damage_multiplier: float = 1.0
     
     def process_attack_intent(self, world_mouse_x: float, world_mouse_y: float) -> Optional[Projectile]:
         """
@@ -77,13 +86,11 @@ class Champion(Entity):
         dy = world_mouse_y - self.y
         distance = math.sqrt(dx**2 + dy**2)
         if distance == 0:
-            None
-        # Cooldown checkpoint using server ticks runtime clocks
+            return None
         current_time = pygame.time.get_ticks()
         if current_time - self.last_shot_time >= self.shot_cooldown:
             self.last_shot_time = current_time
-            # Instantiate a generic projectile context on server (Asset path provided for clients later)
-            return Projectile(self.x, self.y, dx / distance, dy / distance, 10, 30, 30, self.bullet_asset)
+            return Projectile(self.x, self.y, dx / distance, dy / distance, 10, int(30 * self.damage_multiplier), 30, self.bullet_asset)
         return None
     
     def take_damage(self, damage: int) -> None:
@@ -98,11 +105,9 @@ class Champion(Entity):
         if not self.alive:
             return
         current_time = pygame.time.get_ticks()
-        # Validate internal invulnerability windows to prevent instant bursting mechanics
         if current_time - self.last_hit_time >= self.next_hit_cooldown:
             self.hp -= damage
             self.last_hit_time = current_time
-            print(f"Champion Hit. Remaining HP: {self.hp}")
         if self.hp <= 0:
             self.hp = 0
             self.alive = False
@@ -185,6 +190,19 @@ class Champion(Entity):
             self.width = self.sprites.width
             self.height = self.sprites.height
     
+    def add_xp(self, amount: int) -> None:
+        """Awards XP and triggers level-ups until max level is reached."""
+        if self.level >= MAX_LEVEL:
+            return
+        self.xp += amount
+        while self.level < MAX_LEVEL and self.xp >= _XP_TO_NEXT[self.level - 1]:
+            self.xp -= _XP_TO_NEXT[self.level - 1]
+            self.level += 1
+            self.max_hp += _HP_PER_LEVEL
+            self.hp = min(self.hp + _HP_PER_LEVEL, self.max_hp)
+            self.pending_heal += _HP_PER_LEVEL
+            self.damage_multiplier += _DMG_PER_LEVEL
+
     def draw(self, screen: pygame.Surface, camera) -> None:
         """
         Syncs active rendering components and handles pipeline blitting processes.
@@ -194,6 +212,5 @@ class Champion(Entity):
             camera (_type_): Active viewport tracker applying transformation offsets.
         """
         if self.sprites:
-            # Update root image placeholder right before drawing sequence triggers
             self.image = self.sprites.current_sprite
         super().draw(screen, camera)

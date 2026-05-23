@@ -71,8 +71,8 @@ class Entity(pygame.sprite.Sprite):
             entities (list, optional): List of all active game entitiesfor AI decision making. Default to None.
         """
         # Synchronize physics bounding box before processing movement behavior
-        self.rect.x = self.x
-        self.rect.y = self.y
+        self.rect.x = int(self.x)
+        self.rect.y = int(self.y)
         if not self.alive:
             self.image = None
     
