@@ -91,6 +91,10 @@ def threaded_client(conn, player_id):
                     # Relay projectile spawns for this frame (cleared each packet)
                     game_state[p_key]["new_projectiles"] = inputs.get("new_projectiles", [])
 
+                    # Player 0 is minion authority — store and relay their minion states
+                    if player_id == 0 and "minion_states" in inputs:
+                        game_state["minions"] = inputs["minion_states"]
+
                     # Hit events (players + nexuses)
                     for hit in inputs.get("hits", []):
                         target = hit.get("target")

@@ -17,6 +17,9 @@ _XP_MINION = 20       # XP awarded when a nearby enemy minion dies
 _XP_CHAMPION = 150    # XP awarded on champion kill
 _XP_RANGE = 300.0     # Max distance to collect minion XP
 
+_RECALL_DURATION_MS: float = 3000.0
+_SPAWN_POS = {0: (120.0, 1430.0), 1: (1464.0, 103.0)}
+
 class Game:
     """
     Manages the primary core orchestration logic for the MOBA game lifecycle.
@@ -110,6 +113,14 @@ class Game:
         self.is_respawning: bool = False
         self.respawn_timer_ms: float = 0.0
         self.pending_respawn: bool = False
+
+        # Recall system
+        self.is_recalling: bool = False
+        self.recall_elapsed_ms: float = 0.0
+
+        # Minion sync (player 0 = authority)
+        self.minion_id_counter: int = 0
+        self._remote_minions: dict = {}  # id → Minion instance, used by player 1 only
         font_path = resource_path("game/assets/font/Orbitron-Bold.ttf")
         try:
             self.f_death     = pygame.font.Font(font_path, 54)
@@ -171,17 +182,30 @@ class Game:
                             p.team = self.player.team
                             self.add_entity(p, [self.projectiles])
                             self._new_proj_spawns.append(self._proj_to_dict(p))
+
+                elif event.key == pygame.K_b:
+                    if self.is_recalling:
+                        self.is_recalling = False
+                        self.recall_elapsed_ms = 0.0
+                    else:
+                        self.is_recalling = True
+                        self.recall_elapsed_ms = 0.0
     
     def _update_minion_spawning(self) -> None:
         """
         Calculates delta steps to execute procedural lane minion wave deployments.
+        Only called by player 0 (the minion authority).
         """
         self.spawn_timer += self.dt_ms
         if self.is_wave_active and self.minions_spawned_in_wave < self.wave_size:
             if self.spawn_timer > 800:
                 blue_minion = Minion(580, 920, 32, 32, self.blue_minion_img, "blue")
+                blue_minion.minion_id = self.minion_id_counter
+                self.minion_id_counter += 1
                 self.add_entity(blue_minion, [self.enemies])
                 red_minion = Minion(920, 520, 32, 32, self.red_minion_img, "red")
+                red_minion.minion_id = self.minion_id_counter
+                self.minion_id_counter += 1
                 self.add_entity(red_minion, [self.enemies])
                 self.minions_spawned_in_wave += 1
                 self.spawn_timer = 0
@@ -205,12 +229,34 @@ class Game:
             "q": keys[pygame.K_q],
             "s": keys[pygame.K_s],
             "d": keys[pygame.K_d],
-            "b": keys[pygame.K_b]
         }
 
-        # --- 2. Player movement with collisions ---
+        # --- 1b. Recall channel ---
+        if self.is_recalling and self.player is not None:
+            if not self.player.alive:
+                self.is_recalling = False
+                self.recall_elapsed_ms = 0.0
+            elif inputs.get("z") or inputs.get("q") or inputs.get("s") or inputs.get("d"):
+                self.is_recalling = False
+                self.recall_elapsed_ms = 0.0
+            else:
+                self.recall_elapsed_ms += self.dt_ms
+                if self.recall_elapsed_ms >= _RECALL_DURATION_MS:
+                    self.is_recalling = False
+                    self.recall_elapsed_ms = 0.0
+                    spawn = _SPAWN_POS.get(self.my_id, (120.0, 1430.0))
+                    self.player.x = spawn[0]
+                    self.player.y = spawn[1]
+                    self.player.rect.x = int(spawn[0])
+                    self.player.rect.y = int(spawn[1])
+                    heal = self.player.max_hp - self.player.hp
+                    if heal > 0:
+                        self.player.hp = self.player.max_hp
+                        self.player.pending_heal = heal
+
+        # --- 2. Player movement with collisions (frozen during recall) ---
         dx, dy = 0.0, 0.0
-        if self.player is not None and self.player.alive:
+        if self.player is not None and self.player.alive and not self.is_recalling:
             dx, dy = self.player.update_server_state(inputs, self.collisions_rects)
             self.player.update_client_animation(dx, dy)
 
@@ -261,13 +307,16 @@ class Game:
                         proj.alive = False
                         break
             # Collision → nexus (team-based, server-authoritative via hit event)
+            # Tower chain: nexus only takes damage when its protecting tower is destroyed.
             if proj.alive and proj.team:
                 enemy_nexus = self.nexus_r if proj.team == "red" else self.nexus_v
                 enemy_nexus_key = "nexus_r" if proj.team == "red" else "nexus_v"
                 own_nexus = self.nexus_v if proj.team == "red" else self.nexus_r
+                protecting_tower = self.blue_tower if proj.team == "red" else self.red_tower
                 if proj.rect.colliderect(enemy_nexus.rect):
-                    hits_this_frame.append({"target": enemy_nexus_key, "damage": proj.damage})
-                    proj.alive = False
+                    if not protecting_tower.alive:
+                        hits_this_frame.append({"target": enemy_nexus_key, "damage": proj.damage})
+                    proj.alive = False  # Always blocked by nexus, damage only when tower down
                 elif proj.rect.colliderect(own_nexus.rect):
                     proj.alive = False  # Blocked by own nexus, no damage
             # Collision → towers (HP server-authoritative via hit event)
@@ -298,7 +347,12 @@ class Game:
         # Towers target: enemy minions (local damage) and champions (hit events).
         # Each client only reports tower hits on the LOCAL player to avoid double-counting —
         # the remote client handles hits on itself from the same tower.
-        tower_targets = list(self.enemies) + list(self.remote_players)
+        # Player 1 excludes synced minions from tower targets: their lifecycle is controlled
+        # by player 0, so local tower kills would cause flickering.
+        if self.my_id == 0:
+            tower_targets = list(self.enemies) + list(self.remote_players)
+        else:
+            tower_targets = list(self.remote_players)
         if self.player is not None:
             tower_targets.append(self.player)
         for tower in list(self.towers):
@@ -326,6 +380,12 @@ class Game:
             self.player.pending_heal = 0
         packet["new_projectiles"] = self._new_proj_spawns
         self._new_proj_spawns = []
+        # Player 0 is the minion authority — relay all minion states to server
+        if self.my_id == 0:
+            packet["minion_states"] = [
+                {"id": e.minion_id, "x": e.x, "y": e.y, "hp": e.hp, "team": e.team, "alive": e.alive}
+                for e in self.all_sprites if isinstance(e, Minion)
+            ]
         server_state = self.net.send(packet)
         if server_state is None:
             self._disconnected = True
@@ -421,6 +481,32 @@ class Game:
                     self.nexus_v.hp = 0
                     self.nexus_v.alive = False
 
+            # Player 1: sync minion positions/HP from server (player 0 is the authority)
+            if self.my_id != 0:
+                minion_states = server_state.get("minions", [])
+                received_ids = {s["id"] for s in minion_states}
+                for state in minion_states:
+                    mid = state["id"]
+                    if mid not in self._remote_minions:
+                        team = state["team"]
+                        img = self.blue_minion_img if team == "blue" else self.red_minion_img
+                        m = Minion(state["x"], state["y"], 32, 32, img, team)
+                        m.minion_id = mid
+                        self.add_entity(m, [self.enemies])
+                        self._remote_minions[mid] = m
+                    else:
+                        m = self._remote_minions[mid]
+                        m.x = state["x"]
+                        m.y = state["y"]
+                        m.hp = state["hp"]
+                        m.rect.x = int(m.x)
+                        m.rect.y = int(m.y)
+                # Remove minions player 0 has already cleaned up
+                for mid in list(self._remote_minions):
+                    if mid not in received_ids:
+                        self._remote_minions[mid].alive = False
+                        del self._remote_minions[mid]
+
             # Sync tower HP from server
             tower_blue_hp = server_state.get("tower_blue_hp")
             if tower_blue_hp is not None:
@@ -443,26 +529,25 @@ class Game:
         elif self.player is not None and not self.player.alive:
             self._start_respawn()
 
-        # --- 7. Minion waves + AI ---
-        self._update_minion_spawning()
-        # Exclude local player: contact damage is already server-authoritative via hit events (section 4).
-        # If the player were included, _execute_attack would call player.take_damage() locally,
-        # which gets overwritten by server sync the next frame → looks like instant heal.
-        minion_targets = [e for e in self.all_sprites if e is not self.player]
-        # Each client reports enemy-minion hits on its own tower only (mirrors tower→player pattern).
-        if self.player is not None:
-            own_tower = self.blue_tower if self.player.team == "blue" else self.red_tower
-            own_tower_key = "tower_blue" if self.player.team == "blue" else "tower_red"
-        else:
-            own_tower = None
-            own_tower_key = None
-        for entity in list(self.all_sprites):
-            if isinstance(entity, Minion):
-                tower_hits = entity.update_server_state(self.collisions_rects, minion_targets)
-                if own_tower is not None:
-                    for (target, dmg) in tower_hits:
-                        if target is own_tower:
-                            hits_this_frame.append({"target": own_tower_key, "damage": dmg})
+        # --- 7. Minion waves + AI (player 0 only) ---
+        # Player 0 is the minion authority: it spawns, simulates, and relays minion state.
+        # Player 1 receives positions from the server and does not run local AI.
+        if self.my_id == 0:
+            self._update_minion_spawning()
+            minion_targets = [e for e in self.all_sprites if e is not self.player]
+            if self.player is not None:
+                own_tower = self.blue_tower if self.player.team == "blue" else self.red_tower
+                own_tower_key = "tower_blue" if self.player.team == "blue" else "tower_red"
+            else:
+                own_tower = None
+                own_tower_key = None
+            for entity in list(self.all_sprites):
+                if isinstance(entity, Minion):
+                    tower_hits = entity.update_server_state(self.collisions_rects, minion_targets)
+                    if own_tower is not None:
+                        for (target, dmg) in tower_hits:
+                            if target is own_tower:
+                                hits_this_frame.append({"target": own_tower_key, "damage": dmg})
 
         # --- 8. Entity cleanup (player excluded — managed by respawn system) ---
         for entity in list(self.all_sprites):
@@ -508,6 +593,8 @@ class Game:
 
         if self.player is not None:
             self.hud.draw(self.player, self.game_start_ms, self.kills, self.deaths)
+            if self.is_recalling:
+                self.hud.draw_recall(self.recall_elapsed_ms, _RECALL_DURATION_MS)
 
         if self.is_respawning:
             sw, sh = self.screen.get_width(), self.screen.get_height()
@@ -577,7 +664,7 @@ class Game:
 
         dot_count = 0
         dot_timer = 0
-        dummy_inputs = {"z": False, "q": False, "s": False, "d": False, "b": False}
+        dummy_inputs = {"z": False, "q": False, "s": False, "d": False}
         sw, sh = self.screen.get_width(), self.screen.get_height()
 
         while True:
@@ -676,7 +763,7 @@ class Game:
                     winner = "VICTORY" if player_team == "blue" else "DEFEAT"
                 else:
                     winner = "VICTORY" if player_team == "red" else "DEFEAT"
-                end = EndScreen(self.screen, winner)
+                end = EndScreen(self.screen, winner, kills=self.kills, deaths=self.deaths)
                 end.draw()
                 result = end.run()
                 return result

@@ -31,6 +31,7 @@ class Minion(Enemy):
         super().__init__(x, y, width, height, image, damage=5, hp=100)
         # Operational parameters and alignement (Shared/Authoritative)
         self.team: str = team
+        self.minion_id: int = -1  # Assigned by player 0; used for cross-client sync
         self.target: Optional[Entity] = None
         # Leash anchor — the position from which max chase distance is measured
         self.spawn_x: float = x

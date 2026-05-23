@@ -170,8 +170,6 @@ class Champion(Entity):
         if dx != 0 or dy != 0:
             self.last_dx = dx
             self.last_dy = dy
-        if inputs.get("b"):
-            print(f"{self.x}, {self.y}")
         return dx, dy
     
     def update_client_animation(self, dx: float, dy: float) -> None:

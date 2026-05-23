@@ -182,6 +182,21 @@ class HUD:
         self.screen.blit(k_s, k_s.get_rect(right=self.sw - 50, y=10))
         self.screen.blit(d_s, d_s.get_rect(right=self.sw - 50 + k_s.get_height() + 8, y=10))
 
+    def draw_recall(self, elapsed_ms: float, duration_ms: float) -> None:
+        frac = min(1.0, elapsed_ms / duration_ms)
+        bar_w, bar_h = 220, 18
+        x = self.sw // 2 - bar_w // 2
+        y = self.sh // 2 - 90
+
+        label = self.f_hp.render("RECALL...", True, self.CYAN)
+        self.screen.blit(label, label.get_rect(centerx=self.sw // 2, bottom=y - 8))
+
+        pygame.draw.rect(self.screen, (20, 20, 40), (x, y, bar_w, bar_h), border_radius=9)
+        if frac > 0:
+            pygame.draw.rect(self.screen, self.CYAN,
+                             (x, y, int(bar_w * frac), bar_h), border_radius=9)
+        pygame.draw.rect(self.screen, self.CYAN, (x, y, bar_w, bar_h), 1, border_radius=9)
+
     def _draw_announcements(self) -> None:
         now = pygame.time.get_ticks()
         self._announcements = [a for a in self._announcements if now < a[2]]

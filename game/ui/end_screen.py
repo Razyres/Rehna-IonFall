@@ -20,16 +20,11 @@ class EndScreen:
     and handles state redirection inputs back to primary menu components.
     """
     
-    def __init__(self, screen: pygame.Surface, result_text: str):
-        """
-        Initializes a new EndScreen UI workflow layer.
-
-        Args:
-            screen (pygame.Surface): Display target workspace to execute blits upon.
-            result_text (str): Evaluation identifier matching global conditions ("VICTORY" or "DEFEAT")
-        """
+    def __init__(self, screen: pygame.Surface, result_text: str, kills: int = 0, deaths: int = 0):
         self.screen: pygame.Surface = screen
         self.result_text: str = result_text
+        self.kills: int = kills
+        self.deaths: int = deaths
         # Robust font compilation layer with safe standard sysem fallback
         try:
             self.font_title: pygame.font.Font = pygame.font.Font(FONT_PATH, 64)
@@ -61,10 +56,24 @@ class EndScreen:
         sw = self.screen.get_width()
         sh = self.screen.get_height()
         pygame.draw.line(self.screen, ACCENT_PURPLE, (sw // 3, sh // 2 + 20), (2 * sw // 3, sh // 2 + 20), 2)
+        # K/D score
+        kd_text = f"{self.kills}  /  {self.deaths}"
+        kd_surf = self.font_title.render(kd_text, True, (220, 220, 255))
+        kd_rect = kd_surf.get_rect(center=(sw // 2, sh // 2 + 55))
+        self.screen.blit(kd_surf, kd_rect)
+
+        k_label = self.font_button.render("KILLS", True, ACCENT_CYAN)
+        d_label = self.font_button.render("DEATHS", True, DEFEAT_COLOR)
+        slash_w = kd_surf.get_width()
+        k_label_rect = k_label.get_rect(right=kd_rect.centerx - slash_w // 6, y=kd_rect.bottom + 4)
+        d_label_rect = d_label.get_rect(left=kd_rect.centerx + slash_w // 6, y=kd_rect.bottom + 4)
+        self.screen.blit(k_label, k_label_rect)
+        self.screen.blit(d_label, d_label_rect)
+
         # Render interaction operational user directions
         prompt_text = "APPUYEZ SUR ECHAP POUR QUITTER OU SUR ESPACE POUR RETOURNER AU MENU"
         prompt_surf = self.font_button.render(prompt_text, True, (220, 220, 255))
-        prompt_rect = prompt_surf.get_rect(center=(sw // 2, sh // 2 + 80))
+        prompt_rect = prompt_surf.get_rect(center=(sw // 2, sh // 2 + 140))
         self.screen.blit(prompt_surf, prompt_rect)
         pygame.display.flip()
     
