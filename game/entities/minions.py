@@ -41,25 +41,18 @@ class Minion(Enemy):
         self.attack_cooldown: int = 1000
         self.last_attack_time = 0
     
-    def update_server_state(self, collision_rects: List[pygame.Rect], entities: Optional[List[Entity]] = None) -> None:
+    def update_server_state(self, collision_rects: List[pygame.Rect], entities: Optional[List[Entity]] = None) -> list:
         """
         Processes the minion's behavior loop on the server instance.
 
-        Evaluates targeting contexts, modifies coordinates via pathfinding algorithms,
-        and updates the mechanical bounding box variables. This logic never invokes
-        any graphical modules
-
-        Args:
-            collision_rects (List[pygame.Rect]): Global environment obstacle layout.
-            entities (Optional[List[Entity]], optional): List of active world objects for tactical targeting. Defaults to None.
+        Returns a list of (target, damage) tuples for tower hits so the game loop
+        can relay them as server-authoritative hit events.
         """
-        #Synchronize root entity structures (death processing and basic state changes)
         super().update_server_state(collision_rects, entities)
         if not self.alive or entities is None:
-            return
-        # Core AI sequential routine execution (Server-side exclusive)
+            return []
         self._decide_action(entities)
-        self._move_or_attack(collision_rects)
+        return self._move_or_attack(collision_rects)
     
     def _decide_action(self, entities: List[Entity]) -> None:
         # Drop dead target
@@ -99,9 +92,10 @@ class Minion(Enemy):
 
         self.target = best_minion if best_minion is not None else best_other
     
-    def _move_or_attack(self, collision_rects: List[pygame.Rect]) -> None:
+    def _move_or_attack(self, collision_rects: List[pygame.Rect]) -> list:
         """
         Manages directional movement pathing or shifts states into active combat routines.
+        Returns a list of (target, damage) for tower hits (not applied locally).
         """
         dx, dy = 0.0, 0.0
 
@@ -127,8 +121,7 @@ class Minion(Enemy):
                     dy -= self.speed
             else:
                 # Target within parameters, trigger operational weapon calculations
-                self._execute_attack()
-                return
+                return self._execute_attack()
 
         # AABB collision — X axis
         self.rect.x = int(self.x + dx)
@@ -149,16 +142,23 @@ class Minion(Enemy):
                 elif dy < 0:
                     self.rect.top = rect.bottom
         self.y = float(self.rect.y)
-    
-    def _execute_attack(self) -> None: 
+        return []
+
+    def _execute_attack(self) -> list:
         """
-        Applies standard attack damage to the acquired target if internal cooldown metrics permit
+        Applies attack damage to the current target if cooldown allows.
+        For tower targets, damage is NOT applied locally (server-authoritative);
+        instead returns [(target, damage)] so game.py can relay as a hit event.
         """
+        from game.entities.tower import Tower
         current_time = pygame.time.get_ticks()
         if current_time - self.last_attack_time > self.attack_cooldown:
             if self.target and self.target.alive:
-                self.target.take_damage(self.damage)
                 self.last_attack_time = current_time
+                if isinstance(self.target, Tower):
+                    return [(self.target, self.damage)]
+                self.target.take_damage(self.damage)
+        return []
     
     def draw(self, screen: pygame.Surface, camera) -> None:
         """Overrides the rendering pipeline to draw the minion asset texture.

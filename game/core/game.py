@@ -241,9 +241,9 @@ class Game:
                             break
                 continue
 
-            # Collision → minion enemies (local, no server sync needed)
+            # Collision → minion enemies (enemy team only, local damage)
             for enemy in list(self.enemies):
-                if proj.rect.colliderect(enemy.rect):
+                if getattr(enemy, 'team', '') != proj.team and proj.rect.colliderect(enemy.rect):
                     enemy.take_damage(proj.damage)
                     proj.alive = False
                     break
@@ -449,9 +449,20 @@ class Game:
         # If the player were included, _execute_attack would call player.take_damage() locally,
         # which gets overwritten by server sync the next frame → looks like instant heal.
         minion_targets = [e for e in self.all_sprites if e is not self.player]
+        # Each client reports enemy-minion hits on its own tower only (mirrors tower→player pattern).
+        if self.player is not None:
+            own_tower = self.blue_tower if self.player.team == "blue" else self.red_tower
+            own_tower_key = "tower_blue" if self.player.team == "blue" else "tower_red"
+        else:
+            own_tower = None
+            own_tower_key = None
         for entity in list(self.all_sprites):
             if isinstance(entity, Minion):
-                entity.update_server_state(self.collisions_rects, minion_targets)
+                tower_hits = entity.update_server_state(self.collisions_rects, minion_targets)
+                if own_tower is not None:
+                    for (target, dmg) in tower_hits:
+                        if target is own_tower:
+                            hits_this_frame.append({"target": own_tower_key, "damage": dmg})
 
         # --- 8. Entity cleanup (player excluded — managed by respawn system) ---
         for entity in list(self.all_sprites):
