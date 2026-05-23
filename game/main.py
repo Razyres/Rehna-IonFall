@@ -14,13 +14,13 @@ from game.combat.ability import make_heal, make_heavy_shot, make_dash, make_burs
 
 CHAMPIONS_CONFIG = {
     "Ordinateur": {"sprite_prefix": "0RD1N4T3UR", "speed": 5, "hp": 100},
-    "Freud":      {"sprite_prefix": "pretresse",  "speed": 5, "hp": 120},
+    "Pretresse":      {"sprite_prefix": "pretresse",  "speed": 5, "hp": 120},
     "Vagabon":    {"sprite_prefix": "Vagabon",    "speed": 5, "hp": 100},
 }
 
 # Q slot = touche E | E slot = touche R
 ABILITIES = {
-    "Freud":      {"q": make_heal(10000, 30),    "e": make_heavy_shot(5000, 60, 6.0)},
+    "Pretresse":      {"q": make_heal(10000, 30), "e": make_heavy_shot(5000, 60, 6.0)},
     "Ordinateur": {"q": make_dash(8000, 150),    "e": make_burst(6000, 20, 5)},
     "Vagabon":    {"q": make_dash(6000, 150),    "e": make_curse(7000, 15, 4000)},
 }

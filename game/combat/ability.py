@@ -54,7 +54,7 @@ def _direction_to_mouse(champ: Any, mx: float, my: float):
 
 def make_heal(cooldown_ms: int = 10000, hp_restore: int = 30) -> Ability:
     def execute(champ, mx, my):
-        champ.pending_heal += hp_restore  # Server applies the heal authoritatively
+        champ.pending_heal += hp_restore
         return []
     return Ability("Soin", "E", cooldown_ms, execute)
 

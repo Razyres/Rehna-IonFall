@@ -8,16 +8,36 @@ echo.
 
 echo Build du client (IonFall.exe)...
 pyinstaller IonFall.spec --noconfirm
-echo.
+if errorlevel 1 (
+    echo ERREUR : le build du client a echoue.
+    pause & exit /b 1
+)
 
 echo Build du serveur (IonFall_Serveur.exe)...
 pyinstaller serveur.spec --noconfirm
-echo.
+if errorlevel 1 (
+    echo ERREUR : le build du serveur a echoue.
+    pause & exit /b 1
+)
 
-echo === Build termine ! ===
-echo Client  : dist\IonFall\IonFall.exe
-echo Serveur : dist\IonFall_Serveur\IonFall_Serveur.exe
+echo Compression des fichiers du jeu dans game.zip...
+python make_zip.py
+if errorlevel 1 (
+    echo ERREUR : la creation du zip a echoue.
+    pause & exit /b 1
+)
+
+echo Build de l'installeur (IonFall_Setup.exe)...
+pyinstaller setup.spec --noconfirm
+if errorlevel 1 (
+    echo ERREUR : le build de l'installeur a echoue.
+    pause & exit /b 1
+)
+
 echo.
-echo Pour distribuer le jeu, zippe le dossier dist\IonFall\
-echo Le serveur peut tourner sur n'importe quel PC (ou un des deux joueurs).
+echo === Build complet ! ===
+echo Installeur pret : dist\IonFall_Setup.exe
+echo.
+echo Distribue uniquement ce fichier. Il contient tout le jeu.
+echo.
 pause

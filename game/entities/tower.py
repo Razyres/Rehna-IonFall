@@ -51,7 +51,15 @@ class Tower(Entity):
     """
 
     def __init__(self, x: float, y: float, image: Optional[pygame.Surface], team: str, hp: int = 500):
-        super().__init__(x, y, 64, 64, image, hp)
+        if image is not None:
+            br = image.get_bounding_rect()
+            cropped = pygame.Surface((br.width, br.height), pygame.SRCALPHA)
+            cropped.blit(image, (0, 0), br)
+            image = cropped
+            w, h = br.width, br.height
+        else:
+            w, h = 64, 64
+        super().__init__(x, y, w, h, image, hp)
         self.team = team
 
         self.range: float = 250.0

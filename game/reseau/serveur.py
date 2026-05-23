@@ -27,8 +27,10 @@ game_state = {
     "player_1": {"x": 1464.0, "y": 103.0,  "hp": 100, "max_hp": 100, "sprite_prefix": "", "team": "red",  "new_projectiles": []},
     "nexus_r_hp": 1000,
     "nexus_v_hp": 1000,
-    "tower_blue_hp": 500,
-    "tower_red_hp": 500,
+    "tower_blue_1_hp": 500,
+    "tower_blue_2_hp": 500,
+    "tower_red_1_hp": 500,
+    "tower_red_2_hp": 500,
     "projectiles": [],
     "minions": [],
     "ready": False,
@@ -104,10 +106,8 @@ def threaded_client(conn, player_id):
                             game_state["nexus_r_hp"] = max(0, game_state["nexus_r_hp"] - dmg)
                         elif target == "nexus_v":
                             game_state["nexus_v_hp"] = max(0, game_state["nexus_v_hp"] - dmg)
-                        elif target == "tower_blue":
-                            game_state["tower_blue_hp"] = max(0, game_state["tower_blue_hp"] - dmg)
-                        elif target == "tower_red":
-                            game_state["tower_red_hp"] = max(0, game_state["tower_red_hp"] - dmg)
+                        elif target in ("tower_blue_1", "tower_blue_2", "tower_red_1", "tower_red_2"):
+                            game_state[f"{target}_hp"] = max(0, game_state[f"{target}_hp"] - dmg)
                         elif target_id is not None:
                             tk = f"player_{target_id}"
                             if tk in game_state:

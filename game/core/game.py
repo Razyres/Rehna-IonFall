@@ -77,13 +77,30 @@ class Game:
         self.collisions_rects.append(self.nexus_v.rect)
         # Towers
         self.towers = pygame.sprite.Group()
-        self.tower_img = pygame.image.load(resource_path("sprite/tourelle_bleue.png")).convert_alpha()
-        self.blue_tower = Tower(450, 1050, self.tower_img, "blue", hp=500)
-        self.add_entity(self.blue_tower, [self.towers])
-        self.red_tower = Tower(1000, 400, self.tower_img, "red", hp=500)
-        self.add_entity(self.red_tower, [self.towers])
-        self.collisions_rects.append(self.blue_tower.rect)
-        self.collisions_rects.append(self.red_tower.rect)
+        tower_r_img = pygame.image.load(resource_path("sprite/Tower_R.png")).convert_alpha()
+        tower_v_img = pygame.image.load(resource_path("sprite/Tower_V.png")).convert_alpha()
+        self.tower_blue_1 = Tower(415, 1005, tower_r_img, "blue", hp=500)
+        self.tower_blue_2 = Tower(575, 845, tower_r_img, "blue", hp=500)
+        self.tower_red_1 = Tower(1100, 480, tower_v_img, "red", hp=500)
+        self.tower_red_2 = Tower(940, 640, tower_v_img, "red", hp=500)
+        for t in [self.tower_blue_1, self.tower_blue_2, self.tower_red_1, self.tower_red_2]:
+            self.add_entity(t, [self.towers])
+            self.collisions_rects.append(t.rect)
+        self._tower_keys = {
+            self.tower_blue_1: "tower_blue_1",
+            self.tower_blue_2: "tower_blue_2",
+            self.tower_red_1: "tower_red_1",
+            self.tower_red_2: "tower_red_2",
+        }
+        # Minion collision rects: terrain only — towers and nexuses are passable for minions.
+        # Nexuses are excluded because minions spawn inside their own nexus rect; keeping them
+        # in the list causes the AABB to push red minions to x=1360 (right of nexus_v), which
+        # sends them on a deviated path that hits map terrain walls near tower_red_1.
+        _excluded_rect_ids = (
+            {id(t.rect) for t in [self.tower_blue_1, self.tower_blue_2, self.tower_red_1, self.tower_red_2]}
+            | {id(self.nexus_r.rect), id(self.nexus_v.rect)}
+        )
+        self.minion_collision_rects = [r for r in self.collisions_rects if id(r) not in _excluded_rect_ids]
         # Player is injected directly in game.py from main.py
         self.player: Optional[Champion] = None
         self.dt: float = 0.0
@@ -190,6 +207,8 @@ class Game:
                     else:
                         self.is_recalling = True
                         self.recall_elapsed_ms = 0.0
+                elif event.key == pygame.K_x:
+                    print(f"{self.tower_blue_1.width}, {self.tower_blue_1.height}, {self.tower_red_1.width}, {self.tower_red_1.height}")
     
     def _update_minion_spawning(self) -> None:
         """
@@ -199,11 +218,11 @@ class Game:
         self.spawn_timer += self.dt_ms
         if self.is_wave_active and self.minions_spawned_in_wave < self.wave_size:
             if self.spawn_timer > 800:
-                blue_minion = Minion(580, 920, 32, 32, self.blue_minion_img, "blue")
+                blue_minion = Minion(353, 1340, 32, 32, self.blue_minion_img, "blue")
                 blue_minion.minion_id = self.minion_id_counter
                 self.minion_id_counter += 1
                 self.add_entity(blue_minion, [self.enemies])
-                red_minion = Minion(920, 520, 32, 32, self.red_minion_img, "red")
+                red_minion = Minion(1360, 379, 32, 32, self.red_minion_img, "red")
                 red_minion.minion_id = self.minion_id_counter
                 self.minion_id_counter += 1
                 self.add_entity(red_minion, [self.enemies])
@@ -307,16 +326,19 @@ class Game:
                         proj.alive = False
                         break
             # Collision → nexus (team-based, server-authoritative via hit event)
-            # Tower chain: nexus only takes damage when its protecting tower is destroyed.
+            # Tower chain: nexus only takes damage when all protecting towers are destroyed.
             if proj.alive and proj.team:
                 enemy_nexus = self.nexus_r if proj.team == "red" else self.nexus_v
                 enemy_nexus_key = "nexus_r" if proj.team == "red" else "nexus_v"
                 own_nexus = self.nexus_v if proj.team == "red" else self.nexus_r
-                protecting_tower = self.blue_tower if proj.team == "red" else self.red_tower
                 if proj.rect.colliderect(enemy_nexus.rect):
-                    if not protecting_tower.alive:
+                    if proj.team == "red":
+                        protecting_alive = self.tower_blue_1.alive or self.tower_blue_2.alive
+                    else:
+                        protecting_alive = self.tower_red_1.alive or self.tower_red_2.alive
+                    if not protecting_alive:
                         hits_this_frame.append({"target": enemy_nexus_key, "damage": proj.damage})
-                    proj.alive = False  # Always blocked by nexus, damage only when tower down
+                    proj.alive = False  # Always blocked by nexus, damage only when all towers down
                 elif proj.rect.colliderect(own_nexus.rect):
                     proj.alive = False  # Blocked by own nexus, no damage
             # Collision → towers (HP server-authoritative via hit event)
@@ -326,8 +348,7 @@ class Game:
                         continue
                     if proj.rect.colliderect(tower.rect):
                         if tower.team != proj.team:
-                            tower_key = "tower_blue" if tower.team == "blue" else "tower_red"
-                            hits_this_frame.append({"target": tower_key, "damage": proj.damage})
+                            hits_this_frame.append({"target": self._tower_keys[tower], "damage": proj.damage})
                         proj.alive = False
                         break
 
@@ -364,7 +385,34 @@ class Game:
                     hits_this_frame.append({"target_id": self.my_id, "damage": dmg})
                 # Remote player hits discarded: the remote client self-reports them
 
-        # --- 5. Network : send position + inputs + hits + respawn flag, receive global state ---
+        # --- 5. Minion waves + AI (player 0 only) ---
+        # Must run before the network send so minion hits land in the same frame's packet.
+        # Player 0 is the minion authority: it spawns, simulates, and relays minion state.
+        # Player 1 receives positions from the server and does not run local AI.
+        if self.my_id == 0:
+            self._update_minion_spawning()
+            # All sprites are valid targets so enemy minions can aggro the local player
+            minion_targets = list(self.all_sprites)
+            minion_list = [e for e in list(self.all_sprites) if isinstance(e, Minion)]
+            minion_rects_snap = [e.rect.copy() for e in minion_list]
+            for i, entity in enumerate(minion_list):
+                other_minion_rects = [r for j, r in enumerate(minion_rects_snap) if j != i]
+                combined_rects = self.minion_collision_rects + other_minion_rects
+                hits = entity.update_server_state(combined_rects, minion_targets)
+                for (target, dmg) in hits:
+                    if target in self._tower_keys:
+                        hits_this_frame.append({"target": self._tower_keys[target], "damage": dmg})
+                    elif target is self.player and self.my_id is not None:
+                        now = pygame.time.get_ticks()
+                        if now - self.player.last_hit_time >= self.player.next_hit_cooldown:
+                            self.player.last_hit_time = now
+                            hits_this_frame.append({"target_id": self.my_id, "damage": dmg})
+                    elif hasattr(target, 'player_id'):
+                        hits_this_frame.append({"target_id": target.player_id, "damage": dmg})
+                    elif isinstance(target, Minion):
+                        target.take_damage(dmg)
+
+        # --- 6. Network : send position + inputs + hits + respawn flag, receive global state ---
         packet = dict(inputs)
         if self.player is not None:
             packet["x"] = self.player.x
@@ -508,46 +556,24 @@ class Game:
                         del self._remote_minions[mid]
 
             # Sync tower HP from server
-            tower_blue_hp = server_state.get("tower_blue_hp")
-            if tower_blue_hp is not None:
-                self.blue_tower.hp = tower_blue_hp
-                if self.blue_tower.hp <= 0:
-                    self.blue_tower.hp = 0
-                    self.blue_tower.alive = False
-            tower_red_hp = server_state.get("tower_red_hp")
-            if tower_red_hp is not None:
-                self.red_tower.hp = tower_red_hp
-                if self.red_tower.hp <= 0:
-                    self.red_tower.hp = 0
-                    self.red_tower.alive = False
+            for _tkey, _tower in [
+                ("tower_blue_1_hp", self.tower_blue_1), ("tower_blue_2_hp", self.tower_blue_2),
+                ("tower_red_1_hp", self.tower_red_1),   ("tower_red_2_hp", self.tower_red_2),
+            ]:
+                _hp = server_state.get(_tkey)
+                if _hp is not None:
+                    _tower.hp = _hp
+                    if _tower.hp <= 0:
+                        _tower.hp = 0
+                        _tower.alive = False
 
-        # --- 6. Respawn management ---
+        # --- 7. Respawn management ---
         if self.is_respawning:
             self.respawn_timer_ms -= self.dt_ms
             if self.respawn_timer_ms <= 0:
                 self._do_respawn()
         elif self.player is not None and not self.player.alive:
             self._start_respawn()
-
-        # --- 7. Minion waves + AI (player 0 only) ---
-        # Player 0 is the minion authority: it spawns, simulates, and relays minion state.
-        # Player 1 receives positions from the server and does not run local AI.
-        if self.my_id == 0:
-            self._update_minion_spawning()
-            minion_targets = [e for e in self.all_sprites if e is not self.player]
-            if self.player is not None:
-                own_tower = self.blue_tower if self.player.team == "blue" else self.red_tower
-                own_tower_key = "tower_blue" if self.player.team == "blue" else "tower_red"
-            else:
-                own_tower = None
-                own_tower_key = None
-            for entity in list(self.all_sprites):
-                if isinstance(entity, Minion):
-                    tower_hits = entity.update_server_state(self.collisions_rects, minion_targets)
-                    if own_tower is not None:
-                        for (target, dmg) in tower_hits:
-                            if target is own_tower:
-                                hits_this_frame.append({"target": own_tower_key, "damage": dmg})
 
         # --- 8. Entity cleanup (player excluded — managed by respawn system) ---
         for entity in list(self.all_sprites):
