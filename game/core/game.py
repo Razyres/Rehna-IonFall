@@ -9,8 +9,13 @@ from game.entities.nexus import Nexus
 from game.entities.tower import Tower
 from game.entities.minions import Minion
 from game.entities.champion import Champion
+from game.entities.projectile import Projectile
 from game.ui.end_screen import EndScreen
 from game.reseau.network import Network
+
+_XP_MINION = 20       # XP awarded when a nearby enemy minion dies
+_XP_CHAMPION = 150    # XP awarded on champion kill
+_XP_RANGE = 300.0     # Max distance to collect minion XP
 
 class Game:
     """
@@ -62,13 +67,17 @@ class Game:
         self.nexus_v = Nexus(1220, 239, 140, 140, nexus_v_i, "red", hp=1000)
         self.add_entity(self.nexus_r, [self.nexuses])
         self.add_entity(self.nexus_v, [self.nexuses])
+        self.collisions_rects.append(self.nexus_r.rect)
+        self.collisions_rects.append(self.nexus_v.rect)
         # Towers
         self.towers = pygame.sprite.Group()
         self.tower_img = pygame.image.load(resource_path("sprite/tourelle_bleue.png")).convert_alpha()
-        blue_tower = Tower(450, 1050, self.tower_img, "blue", hp=500)
-        self.add_entity(blue_tower, [self.towers])
-        red_tower = Tower(1000, 400, self.tower_img, "red", hp=500)
-        self.add_entity(red_tower, [self.towers])
+        self.blue_tower = Tower(450, 1050, self.tower_img, "blue", hp=500)
+        self.add_entity(self.blue_tower, [self.towers])
+        self.red_tower = Tower(1000, 400, self.tower_img, "red", hp=500)
+        self.add_entity(self.red_tower, [self.towers])
+        self.collisions_rects.append(self.blue_tower.rect)
+        self.collisions_rects.append(self.red_tower.rect)
 
         # Player is injected directly in game.py from main.py
         self.player: Optional[Champion] = None
@@ -91,6 +100,9 @@ class Game:
         self.game_start_ms: int = 0
         self.kills: int = 0
         self.deaths: int = 0
+
+        # Projectile spawns to relay to server this frame
+        self._new_proj_spawns: list = []
 
         # Respawn system
         self.is_respawning: bool = False
@@ -140,6 +152,7 @@ class Game:
                     if proj:
                         proj.team = self.player.team
                         self.add_entity(proj, [self.projectiles])
+                        self._new_proj_spawns.append(self._proj_to_dict(proj))
 
                 elif event.key == pygame.K_e and self.player.ability_q:
                     projs = self.player.ability_q.try_use(self.player, world_mx, world_my)
@@ -147,6 +160,7 @@ class Game:
                         for p in projs:
                             p.team = self.player.team
                             self.add_entity(p, [self.projectiles])
+                            self._new_proj_spawns.append(self._proj_to_dict(p))
 
                 elif event.key == pygame.K_r and self.player.ability_e:
                     projs = self.player.ability_e.try_use(self.player, world_mx, world_my)
@@ -154,6 +168,7 @@ class Game:
                         for p in projs:
                             p.team = self.player.team
                             self.add_entity(p, [self.projectiles])
+                            self._new_proj_spawns.append(self._proj_to_dict(p))
     
     def _update_minion_spawning(self) -> None:
         """
@@ -162,9 +177,9 @@ class Game:
         self.spawn_timer += self.dt_ms
         if self.is_wave_active and self.minions_spawned_in_wave < self.wave_size:
             if self.spawn_timer > 800:
-                blue_minion = Minion(253, 1240, 32, 32, self.blue_minion_img, "blue")
+                blue_minion = Minion(580, 920, 32, 32, self.blue_minion_img, "blue")
                 self.add_entity(blue_minion, [self.enemies])
-                red_minion = Minion(1232, 220, 32, 32, self.red_minion_img, "red")
+                red_minion = Minion(920, 520, 32, 32, self.red_minion_img, "red")
                 self.add_entity(red_minion, [self.enemies])
                 self.minions_spawned_in_wave += 1
                 self.spawn_timer = 0
@@ -205,6 +220,25 @@ class Game:
             proj.update_server_state(self.collisions_rects)
             if not proj.alive:
                 continue
+
+            if proj.is_ghost:
+                # Ghost = visual replica of an enemy projectile; damage is already
+                # handled server-side by the remote client. Just disappear on contact.
+                if self.player is not None and self.player.alive:
+                    if proj.rect.colliderect(self.player.rect):
+                        proj.alive = False
+                if proj.alive:
+                    for nexus in self.nexuses:
+                        if proj.rect.colliderect(nexus.rect):
+                            proj.alive = False
+                            break
+                if proj.alive:
+                    for tower in self.towers:
+                        if tower.alive and proj.rect.colliderect(tower.rect):
+                            proj.alive = False
+                            break
+                continue
+
             # Collision → minion enemies (local, no server sync needed)
             for enemy in list(self.enemies):
                 if proj.rect.colliderect(enemy.rect):
@@ -234,17 +268,45 @@ class Game:
                     proj.alive = False
                 elif proj.rect.colliderect(own_nexus.rect):
                     proj.alive = False  # Blocked by own nexus, no damage
+            # Collision → towers (HP server-authoritative via hit event)
+            if proj.alive and proj.team:
+                for tower in list(self.towers):
+                    if not tower.alive:
+                        continue
+                    if proj.rect.colliderect(tower.rect):
+                        if tower.team != proj.team:
+                            tower_key = "tower_blue" if tower.team == "blue" else "tower_red"
+                            hits_this_frame.append({"target": tower_key, "damage": proj.damage})
+                        proj.alive = False
+                        break
 
         # --- 4. Minion contact damage (enemy team only, reported to server) ---
         if self.player is not None and self.player.alive:
             enemy_minions = [e for e in self.enemies
                              if getattr(e, "team", "") != self.player.team]
-            if any(self.player.rect.colliderect(e.rect) for e in enemy_minions):
+            touching = [e for e in enemy_minions if self.player.rect.colliderect(e.rect)]
+            if touching:
                 now = pygame.time.get_ticks()
                 if now - self.player.last_hit_time >= self.player.next_hit_cooldown:
                     self.player.last_hit_time = now
                     if self.my_id is not None:
-                        hits_this_frame.append({"target_id": self.my_id, "damage": 10})
+                        hits_this_frame.append({"target_id": self.my_id, "damage": touching[0].damage})
+
+        # --- 4b. Tower AI ---
+        # Towers target: enemy minions (local damage) and champions (hit events).
+        # Each client only reports tower hits on the LOCAL player to avoid double-counting —
+        # the remote client handles hits on itself from the same tower.
+        tower_targets = list(self.enemies) + list(self.remote_players)
+        if self.player is not None:
+            tower_targets.append(self.player)
+        for tower in list(self.towers):
+            if not tower.alive:
+                continue
+            champ_hits = tower.update_server_state(tower_targets)
+            for (target, dmg) in champ_hits:
+                if target is self.player and self.my_id is not None:
+                    hits_this_frame.append({"target_id": self.my_id, "damage": dmg})
+                # Remote player hits discarded: the remote client self-reports them
 
         # --- 5. Network : send position + inputs + hits + respawn flag, receive global state ---
         packet = dict(inputs)
@@ -260,6 +322,8 @@ class Game:
             packet["self_heal"] = self.player.pending_heal
             packet["self_max_hp"] = self.player.max_hp
             self.player.pending_heal = 0
+        packet["new_projectiles"] = self._new_proj_spawns
+        self._new_proj_spawns = []
         server_state = self.net.send(packet)
         if server_state is None:
             self._disconnected = True
@@ -291,6 +355,7 @@ class Game:
                     if getattr(rp, "player_id", None) == pid:
                         found = rp
                         break
+                remote_champ = None
                 if found:
                     old_x, old_y = found.x, found.y
                     found.x = player_data["x"]
@@ -300,6 +365,7 @@ class Game:
                     rdx = found.x - old_x
                     rdy = found.y - old_y
                     found.update_client_animation(rdx, rdy)
+                    found.max_hp = player_data.get("max_hp", found.max_hp)
                     was_alive = found.alive
                     found.hp = server_hp
                     if found.hp <= 0:
@@ -307,17 +373,37 @@ class Game:
                         found.alive = False
                         if was_alive:
                             self.kills += 1
+                            self.hud.push_kill(self.kills)
+                            if self.player is not None:
+                                self.player.add_xp(_XP_CHAMPION)
                     elif not found.alive:
                         found.alive = True  # Remote player respawned
+                    remote_champ = found
                 elif server_hp > 0:
                     # Only spawn remote entity if alive (prevents kill-counter loop while dead)
                     opp_prefix = player_data.get("sprite_prefix") or "Vagabon"
-                    opponent = Champion(player_data["x"], player_data["y"], 5, "sprite", opp_prefix, 100)
+                    opp_max_hp = player_data.get("max_hp", 100)
+                    opponent = Champion(player_data["x"], player_data["y"], 5, "sprite", opp_prefix, opp_max_hp)
                     opponent.player_id = pid
                     opponent.team = "blue" if pid == 0 else "red"
                     opponent.hp = server_hp
                     self.remote_players.add(opponent)
                     self.all_sprites.add(opponent)
+                    remote_champ = opponent
+
+                # Spawn ghost projectiles for shots fired by the remote player this frame
+                if remote_champ is not None:
+                    for pd in player_data.get("new_projectiles", []):
+                        ghost = Projectile(
+                            pd["x"], pd["y"], pd["dx"], pd["dy"],
+                            pd["speed"], pd["damage"], pd["range"],
+                            remote_champ.bullet_asset,
+                        )
+                        ghost.is_ghost = True
+                        ghost.team = remote_champ.team
+                        ghost.is_curse = pd.get("is_curse", False)
+                        ghost.curse_duration_ms = pd.get("curse_duration_ms", 0)
+                        self.add_entity(ghost, [self.projectiles])
 
             # Sync nexus HP from server
             nexus_r_hp = server_state.get("nexus_r_hp")
@@ -333,6 +419,20 @@ class Game:
                     self.nexus_v.hp = 0
                     self.nexus_v.alive = False
 
+            # Sync tower HP from server
+            tower_blue_hp = server_state.get("tower_blue_hp")
+            if tower_blue_hp is not None:
+                self.blue_tower.hp = tower_blue_hp
+                if self.blue_tower.hp <= 0:
+                    self.blue_tower.hp = 0
+                    self.blue_tower.alive = False
+            tower_red_hp = server_state.get("tower_red_hp")
+            if tower_red_hp is not None:
+                self.red_tower.hp = tower_red_hp
+                if self.red_tower.hp <= 0:
+                    self.red_tower.hp = 0
+                    self.red_tower.alive = False
+
         # --- 6. Respawn management ---
         if self.is_respawning:
             self.respawn_timer_ms -= self.dt_ms
@@ -346,7 +446,7 @@ class Game:
         # Exclude local player: contact damage is already server-authoritative via hit events (section 4).
         # If the player were included, _execute_attack would call player.take_damage() locally,
         # which gets overwritten by server sync the next frame → looks like instant heal.
-        minion_targets = [e for e in list(self.all_sprites) + list(self.nexuses) if e is not self.player]
+        minion_targets = [e for e in self.all_sprites if e is not self.player]
         for entity in list(self.all_sprites):
             if isinstance(entity, Minion):
                 entity.update_server_state(self.collisions_rects, minion_targets)
@@ -356,6 +456,12 @@ class Game:
             if entity is self.player:
                 continue
             if hasattr(entity, "alive") and not entity.alive:
+                if (isinstance(entity, Minion)
+                        and self.player is not None and self.player.alive
+                        and pygame.math.Vector2(entity.x - self.player.x, entity.y - self.player.y).length() <= _XP_RANGE):
+                    self.player.add_xp(_XP_MINION)
+                if entity.rect in self.collisions_rects:
+                    self.collisions_rects.remove(entity.rect)
                 entity.kill()
 
         # --- 9. Camera ---
@@ -403,6 +509,17 @@ class Game:
 
         pygame.display.flip()
     
+    @staticmethod
+    def _proj_to_dict(proj) -> dict:
+        return {
+            "x": proj.x, "y": proj.y,
+            "dx": proj.dx, "dy": proj.dy,
+            "speed": proj.speed, "damage": proj.damage,
+            "range": proj.range,
+            "is_curse": proj.is_curse,
+            "curse_duration_ms": proj.curse_duration_ms,
+        }
+
     def _start_respawn(self) -> None:
         elapsed_s = (pygame.time.get_ticks() - self.game_start_ms) // 1000
         # Respawn time grows by 3s per minute of game time, capped at 30s

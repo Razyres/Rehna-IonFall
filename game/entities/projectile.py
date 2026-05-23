@@ -51,6 +51,8 @@ class Projectile(Entity):
         self.curse_duration_ms: int = 0
         # Team of the player who fired this projectile
         self.team: str = ""
+        # Ghost projectiles are visual-only replicas of enemy shots — no damage reporting
+        self.is_ghost: bool = False
     
     def update_server_state(self, collision_rects: List[pygame.Rect], entities: Optional[List[Entity]] = None) -> None:
         """

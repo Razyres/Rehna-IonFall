@@ -23,10 +23,12 @@ shutdown_event = threading.Event()
 players_ready = 0
 
 game_state = {
-    "player_0": {"x": 120.0,  "y": 1430.0, "hp": 100, "sprite_prefix": "", "team": "blue"},
-    "player_1": {"x": 1232.0, "y": 220.0,  "hp": 100, "sprite_prefix": "", "team": "red"},
+    "player_0": {"x": 120.0,  "y": 1430.0, "hp": 100, "max_hp": 100, "sprite_prefix": "", "team": "blue", "new_projectiles": []},
+    "player_1": {"x": 1232.0, "y": 220.0,  "hp": 100, "max_hp": 100, "sprite_prefix": "", "team": "red",  "new_projectiles": []},
     "nexus_r_hp": 1000,
     "nexus_v_hp": 1000,
+    "tower_blue_hp": 500,
+    "tower_red_hp": 500,
     "projectiles": [],
     "minions": [],
     "ready": False,
@@ -82,7 +84,12 @@ def threaded_client(conn, player_id):
                     heal = inputs.get("self_heal", 0)
                     if heal > 0:
                         max_hp = inputs.get("self_max_hp", MAX_HP.get(p_key, 100))
+                        MAX_HP[p_key] = max_hp  # Keep in sync for respawn
+                        game_state[p_key]["max_hp"] = max_hp
                         game_state[p_key]["hp"] = min(max_hp, game_state[p_key]["hp"] + heal)
+
+                    # Relay projectile spawns for this frame (cleared each packet)
+                    game_state[p_key]["new_projectiles"] = inputs.get("new_projectiles", [])
 
                     # Hit events (players + nexuses)
                     for hit in inputs.get("hits", []):
@@ -93,6 +100,10 @@ def threaded_client(conn, player_id):
                             game_state["nexus_r_hp"] = max(0, game_state["nexus_r_hp"] - dmg)
                         elif target == "nexus_v":
                             game_state["nexus_v_hp"] = max(0, game_state["nexus_v_hp"] - dmg)
+                        elif target == "tower_blue":
+                            game_state["tower_blue_hp"] = max(0, game_state["tower_blue_hp"] - dmg)
+                        elif target == "tower_red":
+                            game_state["tower_red_hp"] = max(0, game_state["tower_red_hp"] - dmg)
                         elif target_id is not None:
                             tk = f"player_{target_id}"
                             if tk in game_state:

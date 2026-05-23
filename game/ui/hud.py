@@ -1,6 +1,7 @@
 import pygame
 from typing import Any
 from game.utils import resource_path
+from game.entities.champion import _XP_TO_NEXT, MAX_LEVEL
 
 
 class HUD:
@@ -25,24 +26,39 @@ class HUD:
         self.sh = screen.get_height()
         font_path = resource_path("game/assets/font/Orbitron-Bold.ttf")
         try:
-            self.f_timer = pygame.font.Font(font_path, 30)
-            self.f_kda   = pygame.font.Font(font_path, 22)
-            self.f_hp    = pygame.font.Font(font_path, 16)
-            self.f_key   = pygame.font.Font(font_path, 16)
-            self.f_cd    = pygame.font.Font(font_path, 13)
-            self.f_name  = pygame.font.Font(font_path, 11)
+            self.f_timer    = pygame.font.Font(font_path, 30)
+            self.f_kda      = pygame.font.Font(font_path, 22)
+            self.f_hp       = pygame.font.Font(font_path, 16)
+            self.f_key      = pygame.font.Font(font_path, 16)
+            self.f_cd       = pygame.font.Font(font_path, 13)
+            self.f_name     = pygame.font.Font(font_path, 11)
+            self.f_announce = pygame.font.Font(font_path, 46)
         except (FileNotFoundError, OSError):
-            self.f_timer = pygame.font.SysFont("sans-serif", 30, bold=True)
-            self.f_kda   = pygame.font.SysFont("sans-serif", 22, bold=True)
-            self.f_hp    = pygame.font.SysFont("sans-serif", 16, bold=True)
-            self.f_key   = pygame.font.SysFont("sans-serif", 16, bold=True)
-            self.f_cd    = pygame.font.SysFont("sans-serif", 13)
-            self.f_name  = pygame.font.SysFont("sans-serif", 11)
+            self.f_timer    = pygame.font.SysFont("sans-serif", 30, bold=True)
+            self.f_kda      = pygame.font.SysFont("sans-serif", 22, bold=True)
+            self.f_hp       = pygame.font.SysFont("sans-serif", 16, bold=True)
+            self.f_key      = pygame.font.SysFont("sans-serif", 16, bold=True)
+            self.f_cd       = pygame.font.SysFont("sans-serif", 13)
+            self.f_name     = pygame.font.SysFont("sans-serif", 11)
+            self.f_announce = pygame.font.SysFont("sans-serif", 46, bold=True)
+
+        # Kill announcements: list of (text, color, expiry_ms)
+        self._announcements: list = []
+
+    def push_kill(self, total_kills: int) -> None:
+        """Queue a kill announcement banner. Call whenever the local kill counter increments."""
+        now = pygame.time.get_ticks()
+        if total_kills == 1:
+            text, color = "FIRST BLOOD !", (255, 70, 70)
+        else:
+            text, color = "KILL !", self.GREEN
+        self._announcements.append((text, color, now + 2500))
 
     def draw(self, player: Any, game_start_ms: int, kills: int, deaths: int) -> None:
         self._draw_bottom_bar(player)
         self._draw_timer(game_start_ms)
         self._draw_kda(kills, deaths)
+        self._draw_announcements()
 
     # ------------------------------------------------------------------
 
@@ -70,6 +86,25 @@ class HUD:
 
         hp_text = self.f_hp.render(f"HP   {max(0, player.hp)} / {max_hp}", True, self.TEXT)
         self.screen.blit(hp_text, (hp_x, hp_y + hp_h + 8))
+
+        # --- XP bar + level (below HP) ---
+        level = getattr(player, 'level', 1)
+        xp    = getattr(player, 'xp', 0)
+        xp_y  = hp_y + hp_h + 30
+        xp_w, xp_h = 220, 6
+        if level < MAX_LEVEL:
+            xp_frac = min(1.0, xp / _XP_TO_NEXT[level - 1])
+            xp_label = f"NIV {level}   {xp} / {_XP_TO_NEXT[level - 1]} XP"
+        else:
+            xp_frac  = 1.0
+            xp_label = f"NIV {level}   MAX"
+        pygame.draw.rect(self.screen, (20, 20, 40), (hp_x, xp_y, xp_w, xp_h), border_radius=3)
+        if xp_frac > 0:
+            pygame.draw.rect(self.screen, self.PURPLE,
+                             (hp_x, xp_y, int(xp_w * xp_frac), xp_h), border_radius=3)
+        pygame.draw.rect(self.screen, self.DIM, (hp_x, xp_y, xp_w, xp_h), 1, border_radius=3)
+        lv_surf = self.f_name.render(xp_label, True, self.PURPLE if level >= MAX_LEVEL else self.TEXT)
+        self.screen.blit(lv_surf, (hp_x, xp_y + xp_h + 3))
 
         # --- Ability icons (center) ---
         total_icons = 3
@@ -145,3 +180,21 @@ class HUD:
         d_s = self.f_kda.render(f"D  {deaths}", True, self.RED)
         self.screen.blit(k_s, k_s.get_rect(right=self.sw - 24, y=10))
         self.screen.blit(d_s, d_s.get_rect(right=self.sw - 24, y=10 + k_s.get_height() + 4))
+
+    def _draw_announcements(self) -> None:
+        now = pygame.time.get_ticks()
+        self._announcements = [a for a in self._announcements if now < a[2]]
+        y = 68  # Below the timer pill (~y=10 + 30px height + gap)
+        for text, color, expiry in self._announcements:
+            remaining = expiry - now
+            alpha = 255 if remaining > 500 else int(remaining / 500 * 255)
+
+            shadow = self.f_announce.render(text, True, (0, 0, 0))
+            shadow.set_alpha(alpha // 2)
+            surf = self.f_announce.render(text, True, color)
+            surf.set_alpha(alpha)
+
+            rect = surf.get_rect(centerx=self.sw // 2, y=y)
+            self.screen.blit(shadow, (rect.x + 2, rect.y + 2))
+            self.screen.blit(surf, rect)
+            y += surf.get_height() + 8
