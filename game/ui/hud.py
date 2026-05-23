@@ -51,7 +51,7 @@ class HUD:
         if total_kills == 1:
             text, color = "FIRST BLOOD !", (255, 70, 70)
         else:
-            text, color = "KILL !", self.GREEN
+            text, color = "AN ENEMY HAS BEEN KILLED !", self.GREEN
         self._announcements.append((text, color, now + 2500))
 
     def draw(self, player: Any, game_start_ms: int, kills: int, deaths: int) -> None:
@@ -67,8 +67,8 @@ class HUD:
         bar_surf.fill((8, 8, 20, 215))
         self.screen.blit(bar_surf, (0, self.sh - self.BAR_H))
         pygame.draw.line(self.screen, self.CYAN,
-                         (0, self.sh - self.BAR_H),
-                         (self.sw, self.sh - self.BAR_H), 1)
+                        (0, self.sh - self.BAR_H),
+                        (self.sw, self.sh - self.BAR_H), 1)
 
         # --- HP bar (left side) ---
         hp_x = 24
@@ -179,7 +179,7 @@ class HUD:
         k_s = self.f_kda.render(f"K  {kills}", True, self.GREEN)
         d_s = self.f_kda.render(f"D  {deaths}", True, self.RED)
         self.screen.blit(k_s, k_s.get_rect(right=self.sw - 24, y=10))
-        self.screen.blit(d_s, d_s.get_rect(right=self.sw - 24, y=10 + k_s.get_height() + 4))
+        self.screen.blit(d_s, d_s.get_rect(right=self.sw - 24 + k_s.get_height() + 4, y=10))
 
     def _draw_announcements(self) -> None:
         now = pygame.time.get_ticks()
