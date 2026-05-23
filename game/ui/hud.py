@@ -19,6 +19,7 @@ class HUD:
     TEXT   = (220, 220, 255)
     DIM    = (80, 80, 100)
     ICON_BG = (25, 25, 55)
+    BLACK  = (0, 0, 0)
 
     def __init__(self, screen: pygame.Surface):
         self.screen = screen
@@ -176,10 +177,10 @@ class HUD:
         self.screen.blit(timer_s, tr)
 
     def _draw_kda(self, kills: int, deaths: int) -> None:
-        k_s = self.f_kda.render(f"K  {kills}", True, self.GREEN)
-        d_s = self.f_kda.render(f"D  {deaths}", True, self.RED)
-        self.screen.blit(k_s, k_s.get_rect(right=self.sw - 24, y=10))
-        self.screen.blit(d_s, d_s.get_rect(right=self.sw - 24 + k_s.get_height() + 4, y=10))
+        k_s = self.f_kda.render(f"{kills}  /", True, self.BLACK)
+        d_s = self.f_kda.render(f"{deaths}", True, self.BLACK)
+        self.screen.blit(k_s, k_s.get_rect(right=self.sw - 50, y=10))
+        self.screen.blit(d_s, d_s.get_rect(right=self.sw - 50 + k_s.get_height() + 8, y=10))
 
     def _draw_announcements(self) -> None:
         now = pygame.time.get_ticks()

@@ -59,6 +59,9 @@ class Game:
             self.game_map.map_width, self.game_map.map_height
         )
         self.collisions_rects: List[pygame.Rect] = self.game_map.get_collision_rects()
+        # Pure terrain walls for projectile collision — structures (towers, nexuses) excluded
+        # so projectiles can reach explicit damage checks instead of dying silently on contact.
+        self.wall_rects: List[pygame.Rect] = list(self.collisions_rects)
 
         # Nexuses
         nexus_r_i = pygame.image.load(resource_path("sprite/nexus_r.png"))
@@ -216,7 +219,7 @@ class Game:
         for proj in list(self.projectiles):
             if not proj.alive:
                 continue
-            proj.update_server_state(self.collisions_rects)
+            proj.update_server_state(self.wall_rects)
             if not proj.alive:
                 continue
 
@@ -233,7 +236,7 @@ class Game:
                             break
                 if proj.alive:
                     for tower in self.towers:
-                        if tower.alive and proj.rect.colliderect(tower.rect):
+                        if tower.alive and tower.team != proj.team and proj.rect.colliderect(tower.rect):
                             proj.alive = False
                             break
                 continue

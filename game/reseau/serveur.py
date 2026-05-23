@@ -24,7 +24,7 @@ players_ready = 0
 
 game_state = {
     "player_0": {"x": 120.0,  "y": 1430.0, "hp": 100, "max_hp": 100, "sprite_prefix": "", "team": "blue", "new_projectiles": []},
-    "player_1": {"x": 1232.0, "y": 220.0,  "hp": 100, "max_hp": 100, "sprite_prefix": "", "team": "red",  "new_projectiles": []},
+    "player_1": {"x": 1464.0, "y": 103.0,  "hp": 100, "max_hp": 100, "sprite_prefix": "", "team": "red",  "new_projectiles": []},
     "nexus_r_hp": 1000,
     "nexus_v_hp": 1000,
     "tower_blue_hp": 500,

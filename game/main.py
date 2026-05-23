@@ -28,7 +28,7 @@ ABILITIES = {
 # Points de spawn selon le slot réseau attribué par le serveur
 SPAWN_POINTS = {
     0: (120.0, 1430.0),   # Joueur 0 — nexus bleu (bas)
-    1: (1232.0, 220.0),   # Joueur 1 — nexus rouge (haut)
+    1: (1464.0, 103.0),   # Joueur 1 — nexus rouge (haut)
 }
 
 def _server_process() -> None:
