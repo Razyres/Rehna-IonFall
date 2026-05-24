@@ -9,6 +9,7 @@ from tkinter import messagebox
 
 APP_NAME = "IonFall"
 REG_PATH = r"Software\Microsoft\Windows\CurrentVersion\Uninstall\IonFall"
+MANIFEST = "ionfall_files.txt"
 
 
 def resource(rel: str) -> str:
@@ -46,15 +47,56 @@ def _remove_shortcuts() -> None:
             pass
 
 
-def _schedule_deletion(install_dir: str) -> None:
-    # On ecrit un .bat dans %TEMP% pour supprimer le dossier apres la fermeture de l'exe.
-    # CREATE_NO_WINDOW est necessaire pour cmd.exe — DETACHED_PROCESS est incompatible.
+def _delete_installed_files(install_dir: str) -> None:
+    """Supprime uniquement les fichiers listes dans le manifeste d'installation."""
+    manifest_path = os.path.join(install_dir, MANIFEST)
+
+    if not os.path.exists(manifest_path):
+        # Pas de manifeste : installation ancienne, on ne touche a rien de plus
+        return
+
+    with open(manifest_path, "r", encoding="utf-8") as f:
+        entries = [line.strip() for line in f if line.strip()]
+
+    # Nom de l'exe en cours (a ne pas supprimer maintenant — gere par le .bat)
+    self_name = os.path.basename(sys.executable) if getattr(sys, "frozen", False) else ""
+
+    dirs_to_try = set()
+    for rel in entries:
+        if rel in (self_name, MANIFEST):
+            continue  # sera supprime par le .bat apres fermeture
+        full = os.path.join(install_dir, rel.replace("/", os.sep))
+        if os.path.isfile(full):
+            try:
+                os.remove(full)
+                dirs_to_try.add(os.path.dirname(full))
+            except OSError:
+                pass
+
+    # Supprime les sous-dossiers devenus vides (du plus profond vers le plus haut)
+    for d in sorted(dirs_to_try, key=lambda x: x.count(os.sep), reverse=True):
+        if d != install_dir and d.startswith(install_dir):
+            try:
+                os.rmdir(d)
+            except OSError:
+                pass
+
+
+def _schedule_self_deletion(install_dir: str) -> None:
+    # Supprime le .exe desinstalleur et le manifeste 3s apres fermeture,
+    # puis tente de supprimer le dossier d'installation s'il est vide.
+    # CREATE_NO_WINDOW requis pour cmd.exe (DETACHED_PROCESS incompatible).
+    uninstall_exe = os.path.join(install_dir, "IonFall_Uninstall.exe")
+    manifest_path = os.path.join(install_dir, MANIFEST)
     bat = os.path.join(tempfile.gettempdir(), "ionfall_cleanup.bat")
     with open(bat, "w") as f:
         f.write("@echo off\r\n")
         f.write("timeout /t 3 /nobreak >nul\r\n")
-        f.write(f"rd /s /q \"{install_dir}\"\r\n")
-        f.write("del /f /q \"%~f0\"\r\n")  # auto-suppression du .bat
+        f.write(f"del /f /q \"{uninstall_exe}\"\r\n")
+        f.write(f"del /f /q \"{manifest_path}\"\r\n")
+        # rd sans /s supprime seulement si le dossier est vide
+        f.write(f"rd \"{install_dir}\"\r\n")
+        f.write("del /f /q \"%~f0\"\r\n")
     subprocess.Popen(
         ["cmd", "/c", bat],
         creationflags=0x08000200,  # CREATE_NO_WINDOW | CREATE_NEW_PROCESS_GROUP
@@ -77,7 +119,7 @@ def main() -> None:
     if not messagebox.askyesno(
         f"Desinstaller {APP_NAME}",
         f"Voulez-vous vraiment desinstaller {APP_NAME} ?\n\n"
-        f"Tous les fichiers du dossier d'installation seront supprimes.",
+        f"Les fichiers du jeu seront supprimes.",
     ):
         root.destroy()
         return
@@ -85,7 +127,8 @@ def main() -> None:
     install_dir = _install_dir()
     _remove_registry()
     _remove_shortcuts()
-    _schedule_deletion(install_dir)
+    _delete_installed_files(install_dir)
+    _schedule_self_deletion(install_dir)
 
     messagebox.showinfo(f"Desinstaller {APP_NAME}", f"{APP_NAME} a ete desinstalle avec succes.")
     root.destroy()

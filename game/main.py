@@ -11,6 +11,7 @@ from game.core.game import Game
 from game.ui.menu import Menu
 from game.entities.champion import Champion
 from game.combat.ability import make_heal, make_heavy_shot, make_dash, make_burst, make_curse
+from game.utils import resource_path
 
 CHAMPIONS_CONFIG = {
     "Freud":      {"sprite_prefix": "Freud",      "speed": 5, "hp": 110},
@@ -40,6 +41,12 @@ def _server_process() -> None:
 
 def main() -> None:
     pygame.init()
+    pygame.display.set_caption("IonFall")
+    try:
+        icon = pygame.image.load(resource_path("sprite/IonFall_48x48.png"))
+        pygame.display.set_icon(icon)
+    except Exception:
+        pass
     screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
     clock = pygame.time.Clock()
     app_running = True

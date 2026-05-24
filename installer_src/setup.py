@@ -147,13 +147,24 @@ class Installer(tk.Tk):
                     if install_site_web or not m.startswith("site_web/")
                 ]
                 n = len(to_extract)
+                extracted = []
                 for i, member in enumerate(to_extract):
                     zf.extract(member, dest)
+                    extracted.append(member)
                     self._set_status(f"Extraction : {member[:55]}", (i + 1) / n * 75)
         except Exception as e:
             messagebox.showerror("Erreur d'extraction", str(e))
             self.btn_install.config(state="normal")
             return
+
+        # Manifeste pour le desinstalleur (liste uniquement les fichiers, pas les dossiers)
+        manifest_path = os.path.join(dest, "ionfall_files.txt")
+        with open(manifest_path, "w", encoding="utf-8") as mf:
+            for m in extracted:
+                if not m.endswith("/"):
+                    mf.write(m + "\n")
+            mf.write("IonFall_Uninstall.exe\n")
+            mf.write("ionfall_files.txt\n")
 
         game_exe      = os.path.join(dest, "IonFall.exe")
         uninstall_exe = os.path.join(dest, "IonFall_Uninstall.exe")
