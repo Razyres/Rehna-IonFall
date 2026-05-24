@@ -47,6 +47,12 @@ def main() -> None:
         pygame.display.set_icon(icon)
     except Exception:
         pass
+    try:
+        pygame.mixer.music.load(resource_path("sound/music/Rusted Algorithms.mp3"))
+        pygame.mixer.music.set_volume(0.5)
+        pygame.mixer.music.play(-1)
+    except Exception:
+        pass
     screen = pygame.display.set_mode((0, 0), pygame.FULLSCREEN)
     clock = pygame.time.Clock()
     app_running = True
