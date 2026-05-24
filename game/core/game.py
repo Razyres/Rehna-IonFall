@@ -663,8 +663,8 @@ class Game:
 
     def _start_respawn(self) -> None:
         elapsed_s = (pygame.time.get_ticks() - self.game_start_ms) // 1000
-        # Respawn time grows by 3s per minute of game time, capped at 30s
-        respawn_s = min(5 + (elapsed_s // 60) * 3, 30)
+        # Respawn time grows by 1s per minute of game time, capped at 15s
+        respawn_s = min(5 + (elapsed_s // 60) * 1, 15)
         self.respawn_timer_ms = float(respawn_s * 1000)
         self.is_respawning = True
 
