@@ -90,7 +90,7 @@ class Champion(Entity):
         current_time = pygame.time.get_ticks()
         if current_time - self.last_shot_time >= self.shot_cooldown:
             self.last_shot_time = current_time
-            return Projectile(self.x, self.y, dx / distance, dy / distance, 10, int(30 * self.damage_multiplier), 30, self.bullet_asset)
+            return Projectile(self.x, self.y, dx / distance, dy / distance, 10, int(30 * self.damage_multiplier), 15, self.bullet_asset)
         return None
     
     def take_damage(self, damage: int) -> None:

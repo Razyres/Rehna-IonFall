@@ -14,10 +14,10 @@ from game.combat.ability import make_heal, make_heavy_shot, make_dash, make_burs
 from game.utils import resource_path
 
 CHAMPIONS_CONFIG = {
-    "Freud":      {"sprite_prefix": "Freud",      "speed": 5, "hp": 110},
-    "Ordinateur": {"sprite_prefix": "0RD1N4T3UR", "speed": 5, "hp": 100},
-    "Pretresse":  {"sprite_prefix": "Pretresse",  "speed": 5, "hp": 120},
-    "Vagabon":    {"sprite_prefix": "Vagabon",    "speed": 5, "hp": 100},
+    "Freud":      {"sprite_prefix": "Freud",      "speed": 4, "hp": 110},
+    "Ordinateur": {"sprite_prefix": "0RD1N4T3UR", "speed": 4, "hp": 100},
+    "Pretresse":  {"sprite_prefix": "Pretresse",  "speed": 4, "hp": 120},
+    "Vagabon":    {"sprite_prefix": "Vagabon",    "speed": 4, "hp": 100},
 }
 
 # Q slot = touche E | E slot = touche R

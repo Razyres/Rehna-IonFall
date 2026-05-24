@@ -114,14 +114,14 @@ class MinionSprite:
     """4-directional sprite manager for lane minions.
 
     Loads creep_{WxH}_{team_code}_{dir}.png assets from the given folder.
-    team 'blue' maps to team code 'V' (Vert), 'red' to 'R'.
+    team 'blue' maps to team code 'R' (Rouge), 'red' to 'V' (Vert).
     Diagonal movement vectors are resolved to the dominant cardinal axis.
     """
 
     DIRS4 = ("N", "S", "E", "W")
 
     def __init__(self, sprite_folder: str, team: str):
-        team_code = "V" if team == "blue" else "R"
+        team_code = "R" if team == "blue" else "V"
         if not os.path.isabs(sprite_folder):
             sprite_folder = resource_path(sprite_folder)
         folder = Path(sprite_folder)
