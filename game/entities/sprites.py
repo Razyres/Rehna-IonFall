@@ -101,10 +101,58 @@ class Sprite:
     def draw(self, surface: pygame.Surface) -> None:
         """
         Executes a basic fixed viewport rendering blit.
-        
+
         Note: Mostly bypassed in favor of advanced automated camera system processing.
 
         Args:
             surface (pygame.Surface): Display target to apply blit operations onto.
         """
         surface.blit(self.sprites[self.direction], self.rect)
+
+
+class MinionSprite:
+    """4-directional sprite manager for lane minions.
+
+    Loads creep_{WxH}_{team_code}_{dir}.png assets from the given folder.
+    team 'blue' maps to team code 'V' (Vert), 'red' to 'R'.
+    Diagonal movement vectors are resolved to the dominant cardinal axis.
+    """
+
+    DIRS4 = ("N", "S", "E", "W")
+
+    def __init__(self, sprite_folder: str, team: str):
+        team_code = "V" if team == "blue" else "R"
+        if not os.path.isabs(sprite_folder):
+            sprite_folder = resource_path(sprite_folder)
+        folder = Path(sprite_folder)
+        self.sprites: Dict[str, pygame.Surface] = {}
+        self.direction: str = "S"
+        for d in self.DIRS4:
+            pattern = str(folder / f"creep_*_{team_code}_{d}.png")
+            matches = glob.glob(pattern)
+            if not matches:
+                raise FileNotFoundError(f"Minion sprite not found: {pattern}")
+            path = Path(matches[0])
+            img = pygame.image.load(str(path)).convert_alpha()
+            m = re.search(r'(\d+)x(\d+)', path.name)
+            if m:
+                sw, sh = int(m.group(1)), int(m.group(2))
+            else:
+                sw, sh = img.get_size()
+            self.sprites[d] = pygame.transform.scale(img, (sw, sh))
+        self.width: int = self.sprites["S"].get_width()
+        self.height: int = self.sprites["S"].get_height()
+
+    @property
+    def current_sprite(self) -> pygame.Surface:
+        return self.sprites[self.direction]
+
+    def set_direction(self, dx: float, dy: float) -> None:
+        if dx == 0 and dy == 0:
+            return
+        if abs(dx) >= abs(dy):
+            self.direction = "E" if dx > 0 else "W"
+        else:
+            self.direction = "S" if dy > 0 else "N"
+        self.width = self.sprites[self.direction].get_width()
+        self.height = self.sprites[self.direction].get_height()

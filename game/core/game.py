@@ -113,10 +113,6 @@ class Game:
         self.wave_size: int = 4
         self.is_wave_active: bool = True
 
-        # Graphic Assets
-        self.blue_minion_img: pygame.Surface = pygame.image.load(resource_path("sprite/test_sbire_blue.png")).convert_alpha()
-        self.red_minion_img: pygame.Surface = pygame.image.load(resource_path("sprite/test_sbire_red.png")).convert_alpha()
-
         # HUD and match stats
         self.hud: HUD = HUD(screen)
         self.game_start_ms: int = 0
@@ -218,11 +214,11 @@ class Game:
         self.spawn_timer += self.dt_ms
         if self.is_wave_active and self.minions_spawned_in_wave < self.wave_size:
             if self.spawn_timer > 800:
-                blue_minion = Minion(353, 1340, 32, 32, self.blue_minion_img, "blue")
+                blue_minion = Minion(353, 1340, "blue")
                 blue_minion.minion_id = self.minion_id_counter
                 self.minion_id_counter += 1
                 self.add_entity(blue_minion, [self.enemies])
-                red_minion = Minion(1360, 379, 32, 32, self.red_minion_img, "red")
+                red_minion = Minion(1360, 379, "red")
                 red_minion.minion_id = self.minion_id_counter
                 self.minion_id_counter += 1
                 self.add_entity(red_minion, [self.enemies])
@@ -404,6 +400,7 @@ class Game:
                 other_minion_rects = [r for j, r in enumerate(minion_rects_snap) if j != i]
                 combined_rects = self.minion_collision_rects + other_minion_rects
                 hits = entity.update_server_state(combined_rects, minion_targets)
+                entity.update_client_animation(entity.last_dx, entity.last_dy)
                 for (target, dmg) in hits:
                     if target in self._tower_keys:
                         hits_this_frame.append({"target": self._tower_keys[target], "damage": dmg})
@@ -542,18 +539,20 @@ class Game:
                     mid = state["id"]
                     if mid not in self._remote_minions:
                         team = state["team"]
-                        img = self.blue_minion_img if team == "blue" else self.red_minion_img
-                        m = Minion(state["x"], state["y"], 32, 32, img, team)
+                        m = Minion(state["x"], state["y"], team)
                         m.minion_id = mid
                         self.add_entity(m, [self.enemies])
                         self._remote_minions[mid] = m
                     else:
                         m = self._remote_minions[mid]
+                        dx = state["x"] - m.x
+                        dy = state["y"] - m.y
                         m.x = state["x"]
                         m.y = state["y"]
                         m.hp = state["hp"]
                         m.rect.x = int(m.x)
                         m.rect.y = int(m.y)
+                        m.update_client_animation(dx, dy)
                 # Remove minions player 0 has already cleaned up
                 for mid in list(self._remote_minions):
                     if mid not in received_ids:

@@ -61,7 +61,6 @@ def _delete_installed_files(install_dir: str) -> None:
     # Nom de l'exe en cours (a ne pas supprimer maintenant — gere par le .bat)
     self_name = os.path.basename(sys.executable) if getattr(sys, "frozen", False) else ""
 
-    dirs_to_try = set()
     for rel in entries:
         if rel in (self_name, MANIFEST):
             continue  # sera supprime par le .bat apres fermeture
@@ -69,17 +68,18 @@ def _delete_installed_files(install_dir: str) -> None:
         if os.path.isfile(full):
             try:
                 os.remove(full)
-                dirs_to_try.add(os.path.dirname(full))
             except OSError:
                 pass
 
-    # Supprime les sous-dossiers devenus vides (du plus profond vers le plus haut)
-    for d in sorted(dirs_to_try, key=lambda x: x.count(os.sep), reverse=True):
-        if d != install_dir and d.startswith(install_dir):
-            try:
-                os.rmdir(d)
-            except OSError:
-                pass
+    # Supprime les sous-dossiers devenus vides, du plus profond vers la racine.
+    # os.rmdir echoue silencieusement si le dossier n'est pas vide — sans risque.
+    for d, _subdirs, _files in os.walk(install_dir, topdown=False):
+        if d == install_dir:
+            continue
+        try:
+            os.rmdir(d)
+        except OSError:
+            pass
 
 
 def _schedule_self_deletion(install_dir: str) -> None:
