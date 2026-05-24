@@ -1,81 +1,107 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>IonFall — Téléchargements</title>
     <link rel="stylesheet" href="styles.css">
-	<link rel="icon" type="image/png" href="images/IonFall_48x48.png">
+    <link rel="icon" type="image/png" href="images/IonFall_48x48.png">
     <style>
-        h1 {
+        h1 { text-align: center; font-size: xx-large; }
+        h2 { text-align: center; font-size: xx-large; }
+        h3 { text-align: left; font-size: x-large; }
+        div { text-align: center; }
+        .download-grid {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            flex-wrap: wrap;
+            margin: 40px 100px;
+        }
+        .download-card {
+            background: #373E62;
+            border-radius: 12px;
+            padding: 30px 40px;
             text-align: center;
-            width: auto;
-            font-size: xx-large;
+            min-width: 220px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            transition: transform 0.2s;
         }
-        h3 {
-            text-align: left;
-            width: auto;
-            font-size: x-large;
+        .download-card:hover { transform: scale(1.03); }
+        .download-card p {
+            font-size: 1.1em;
+            margin-bottom: 20px;
+            color: #F2FFFE;
         }
-        div {
-            text-align: center;
+        .btn-download {
+            display: inline-block;
+            background: #00FFF3;
+            color: #0D1D45;
+            font-weight: bold;
+            font-size: 1em;
+            padding: 10px 24px;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: background 0.2s;
         }
-        h2 {
-            text-align: center;
-            width: auto;
-            font-size: xx-large;
+        .btn-download:hover {
+            background: #f978f0;
+            color: #0D1D45;
         }
+        .btn-download:visited { color: #0D1D45; }
     </style>
-    
 </head>
 <body>
     <header>
         <div class="page">
-		<img class="image_cote" src="images/logo.png" width="100%" alt="">
-			<div class="contenu">
-				<h1><br>Projet J3D : IonFall</br></h1>
-				<p></p>
-		</div>
-	</div>
-
-		<nav>
-		<!--Bandeau header pour la navigation-->
-			<ul class="en_tete">
-				<li class="logo-item">
-					<a href="Page_accueil.html" id="logo"></a>
-				</li>
-
-				<li><a href="Presentation_groupe.html"><h3>Groupe</h3></a></li>
-				<li><a href="Presentation_projet.html"><h3>Projet</h3></a></li>
-				<li><a href="Download.html"><h3>Download</h3></a></li>
-				<li><a href="Ressources.html"><h3>Ressources</h3></a></li>
-			</ul>
-		</nav>
+            <img class="image_cote" src="images/logo.png" width="100%" alt="">
+            <div class="contenu">
+                <h1>Projet J3D : IonFall</h1>
+            </div>
+        </div>
+        <nav>
+            <ul class="en_tete">
+                <li class="logo-item">
+                    <a href="Page_accueil.html" id="logo"></a>
+                </li>
+                <li><a href="Presentation_groupe.html"><h3>Groupe</h3></a></li>
+                <li><a href="Presentation_projet.html"><h3>Projet</h3></a></li>
+                <li><a href="Download.html"><h3>Download</h3></a></li>
+                <li><a href="Ressources.html"><h3>Ressources</h3></a></li>
+            </ul>
+        </nav>
     </header>
-    <main>
-<h1>Téléchargements</h1>
-    </main>
-	<p class="centre_texte">
-    <a href="PDF/Rapport de soutenance.pdf" download="Rapport de soutenance.pdf">Télécharger le PDF du Rapport de soutenance</a>
-	</p>
-    <footer>
-<!--Bandeau pour séparer en bas de page-->
-<div class="separateur">
-    <span>NAVIGATION</span>
-</div>
-<div><a href="Page_accueil.html">Retour à la page d'accueil</a></div>
 
-<!--Bandeau pour séparer en bas de page-->
-<div class="separateur">
-    <span>INFORMATION</span>
-</div>
-<div>
-<h4>Email :<br>
-rayan.hadad@epita.fr | erwan.leboeuf@epita.fr | hevan.lam@epita.fr | nicolas.bellard@epita.fr |alexandre.vandenberghe@epita.fr </h4>
-</<div>
-<!--Infos vite fait-->
+    <main>
+        <h1>Téléchargements</h1>
+
+        <div class="download-grid">
+
+            <div class="download-card">
+                <h2>🎮 IonFall</h2>
+                <p>Installeur Windows<br>(Windows 10 / 11)</p>
+                <a class="btn-download" href="IonFall_Setup.exe" download>Télécharger le jeu</a>
+            </div>
+
+            <div class="download-card">
+                <h2>📄 Rapport</h2>
+                <p>Rapport de soutenance<br>du projet J3D</p>
+                <a class="btn-download" href="PDF/Rapport de soutenance.pdf" download="Rapport de soutenance.pdf">Télécharger le PDF</a>
+            </div>
+
+        </div>
+    </main>
+
+    <footer>
+        <div class="separateur"><span>NAVIGATION</span></div>
+        <div><a href="Page_accueil.html">Retour à la page d'accueil</a></div>
+
+        <div class="separateur"><span>INFORMATION</span></div>
+        <div>
+            <h4>Email :<br>
+            rayan.hadad@epita.fr | erwan.leboeuf@epita.fr | hevan.lam@epita.fr |
+            nicolas.bellard@epita.fr | alexandre.vandenberghe@epita.fr</h4>
+        </div>
     </footer>
 </body>
-
 </html>
-

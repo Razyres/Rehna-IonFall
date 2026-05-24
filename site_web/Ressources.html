@@ -1,110 +1,108 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>IonFall — Ressources</title>
     <link rel="stylesheet" href="styles.css">
-	<link rel="icon" type="image/png" href="images/IonFall_48x48.png">
+    <link rel="icon" type="image/png" href="images/IonFall_48x48.png">
     <style>
-		h1 {
-            text-align: center;
-            width: auto;
-            font-size: xx-large;
-        }
-        h3 {
-            text-align: left;
-            width: auto;
-            font-size: x-large;
-        }
-        div {
-            text-align: center;
-        }
-        h2 {
-            text-align: center;
-            width: auto;
-            font-size: xx-large;
-        }
+        h1 { text-align: center; font-size: xx-large; }
+        h2 { text-align: center; font-size: xx-large; }
+        h3 { text-align: left; font-size: x-large; }
+        div { text-align: center; }
+        .ressources-section { margin: 0 100px 30px 100px; }
+        .ressources-section h2 { text-align: left; font-size: 1.4em; text-decoration: underline; margin-bottom: 10px; }
+        .ressources-section ul { list-style: none; padding: 0; }
+        .ressources-section li { font-size: 1.3em; margin: 8px 0 8px 20px; }
+        .ressources-section li::before { content: "• "; }
     </style>
 </head>
 <body>
     <header>
         <div class="page">
-		<img class="image_cote" src="images/logo.png" width="100%" alt="">
-			<div class="contenu">
-				<h1><br>Projet J3D : IonFall</br></h1>
-				<p></p>
-		</div>
-	</div>
-
-		<nav>
-		<!--Bandeau header pour la navigation-->
-			<ul class="en_tete">
-				<li class="logo-item">
-					<a href="Page_accueil.html" id="logo"></a>
-				</li>
-
-				<li><a href="Presentation_groupe.html"><h3>Groupe</h3></a></li>
-				<li><a href="Presentation_projet.html"><h3>Projet</h3></a></li>
-				<li><a href="Download.html"><h3>Download</h3></a></li>
-				<li><a href="Ressources.html"><h3>Ressources</h3></a></li>
-			</ul>
-		</nav>
+            <img class="image_cote" src="images/logo.png" width="100%" alt="">
+            <div class="contenu">
+                <h1>Projet J3D : IonFall</h1>
+            </div>
+        </div>
+        <nav>
+            <ul class="en_tete">
+                <li class="logo-item">
+                    <a href="Page_accueil.html" id="logo"></a>
+                </li>
+                <li><a href="Presentation_groupe.html"><h3>Groupe</h3></a></li>
+                <li><a href="Presentation_projet.html"><h3>Projet</h3></a></li>
+                <li><a href="Download.html"><h3>Download</h3></a></li>
+                <li><a href="Ressources.html"><h3>Ressources</h3></a></li>
+            </ul>
+        </nav>
     </header>
+
     <main>
-<h1>Ressources</h1>
+        <h1>Ressources externes</h1>
 
-<p class="alinea_indent">
-<u>Inspiration :</u><br></p>
-<p class="alinea_sans_indent">
-• League of Legends 
-• Cyberpunk 2077 
-• Stardew Valley 
-• Undertale 
-• Pinterest 
-• Brawl Star •<br></p>
-<p class="alinea_indent">
-<u>Applications utilisées :</u><br></p>
-<p class="alinea_sans_indent">
-• Github 
-• LibreSprite 
-• Tiled 
-• ChatGPT 
-• Copilot 
-• Claude 
-• Pygame 
-• Notepad++ 
-• Ubuntu 
-• VS code •<br></p>
-<p class="alinea_indent">
-<u>Tutoriels :</u><br></p>
-<p class="alinea_sans_indent">
-• "The ONLY Pixel Art Guide You Need (Beginner to Advanced)" par <em>Juniper Dev</em> <br>
-• "Apprenez le CSS en 1 heure ! Cours Complet Débutant 2026" par <em>Comment Coder</em> <br></p>
+        <div class="ressources-section">
+            <h2>Inspirations</h2>
+            <ul>
+                <li><a href="https://www.leagueoflegends.com/" target="_blank" rel="noopener">League of Legends</a></li>
+                <li><a href="https://www.cyberpunk.net/" target="_blank" rel="noopener">Cyberpunk 2077</a></li>
+                <li><a href="https://www.stardewvalley.net/" target="_blank" rel="noopener">Stardew Valley</a></li>
+                <li><a href="https://undertale.com/" target="_blank" rel="noopener">Undertale</a></li>
+                <li><a href="https://www.pinterest.fr/" target="_blank" rel="noopener">Pinterest</a></li>
+                <li><a href="https://supercell.com/en/games/brawlstars/" target="_blank" rel="noopener">Brawl Stars</a></li>
+            </ul>
+        </div>
 
+        <div class="ressources-section">
+            <h2>Bibliothèques et outils de développement</h2>
+            <ul>
+                <li><a href="https://www.pygame.org/" target="_blank" rel="noopener">Pygame</a> — moteur de jeu Python</li>
+                <li><a href="https://github.com/" target="_blank" rel="noopener">GitHub</a> — gestion de version</li>
+                <li><a href="https://code.visualstudio.com/" target="_blank" rel="noopener">Visual Studio Code</a> — éditeur de code</li>
+                <li><a href="https://notepad-plus-plus.org/" target="_blank" rel="noopener">Notepad++</a> — éditeur de texte</li>
+                <li><a href="https://ubuntu.com/" target="_blank" rel="noopener">Ubuntu</a> — système d'exploitation</li>
+                <li><a href="https://www.mapeditor.org/" target="_blank" rel="noopener">Tiled</a> — éditeur de cartes</li>
+                <li><a href="https://libresprite.github.io/" target="_blank" rel="noopener">LibreSprite</a> — éditeur de pixel art</li>
+            </ul>
+        </div>
 
+        <div class="ressources-section">
+            <h2>Intelligence artificielle</h2>
+            <ul>
+                <li><a href="https://chatgpt.com/" target="_blank" rel="noopener">ChatGPT</a> — OpenAI</li>
+                <li><a href="https://copilot.microsoft.com/" target="_blank" rel="noopener">GitHub Copilot</a> — Microsoft</li>
+                <li><a href="https://claude.ai/" target="_blank" rel="noopener">Claude</a> — Anthropic</li>
+            </ul>
+        </div>
 
-   </span></p>
+        <div class="ressources-section">
+            <h2>Tutoriels</h2>
+            <ul>
+                <li>
+                    <a href="https://www.youtube.com/watch?v=lfDFEuQPJSE" target="_blank" rel="noopener">
+                        "The ONLY Pixel Art Guide You Need (Beginner to Advanced)"
+                    </a> — <em>Juniper Dev</em>
+                </li>
+                <li>
+                    <a href="https://www.youtube.com/watch?v=X9PzBHgGnYo" target="_blank" rel="noopener">
+                        "Apprenez le CSS en 1 heure ! Cours Complet Débutant 2026"
+                    </a> — <em>Comment Coder</em>
+                </li>
+            </ul>
+        </div>
     </main>
-        <footer>
-<!--Bandeau pour séparer en bas de page-->
-<div class="separateur">
-    <span>NAVIGATION</span>
-</div>
-<div><a href="Page_accueil.html">Retour à la page d'accueil</a></div>
 
-<!--Bandeau pour séparer en bas de page-->
-<div class="separateur">
-    <span>INFORMATION</span>
-</div>
-<div>
-<h4>Email :<br>
-rayan.hadad@epita.fr | erwan.leboeuf@epita.fr | hevan.lam@epita.fr | nicolas.bellard@epita.fr |alexandre.vandenberghe@epita.fr </h4>
-</<div>
-<!--Infos vite fait-->
+    <footer>
+        <div class="separateur"><span>NAVIGATION</span></div>
+        <div><a href="Page_accueil.html">Retour à la page d'accueil</a></div>
+
+        <div class="separateur"><span>INFORMATION</span></div>
+        <div>
+            <h4>Email :<br>
+            rayan.hadad@epita.fr | erwan.leboeuf@epita.fr | hevan.lam@epita.fr |
+            nicolas.bellard@epita.fr | alexandre.vandenberghe@epita.fr</h4>
+        </div>
     </footer>
 </body>
 </html>
-
-
-
