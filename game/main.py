@@ -49,7 +49,7 @@ def main() -> None:
         pass
     try:
         pygame.mixer.music.load(resource_path("sound/music/Rusted Algorithms.mp3"))
-        pygame.mixer.music.set_volume(0.5)
+        pygame.mixer.music.set_volume(0.25)
         pygame.mixer.music.play(-1)
     except Exception:
         pass

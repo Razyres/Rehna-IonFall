@@ -199,6 +199,15 @@ class Installer(tk.Tk):
             f"{APP_NAME} a ete installe dans :\n{dest}\n\nLancer le jeu maintenant ?",
         ):
             subprocess.Popen([game_exe], cwd=dest)
+        if messagebox.askyesno(
+            "Jouer en ligne",
+            "IonFall est un jeu multijoueur en reseau local.\n\n"
+            "Pour jouer en ligne avec un ami, Hamachi (VPN gratuit) est recommande :\n"
+            "il simule un reseau local entre deux ordinateurs distants.\n\n"
+            "Ouvrir la page de telechargement de Hamachi ?",
+        ):
+            import webbrowser
+            webbrowser.open("https://vpn.net/")
         self.destroy()
 
 
