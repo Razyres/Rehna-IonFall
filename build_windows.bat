@@ -6,14 +6,21 @@ echo Installation des dependances...
 python -m pip install "pygame>=2.6.1" PyTMX==3.32 pyinstaller
 echo.
 
-echo Build du client (IonFall.exe)...
+echo Build du jeu (IonFall.exe)...
 python -m PyInstaller IonFall.spec --noconfirm
 if errorlevel 1 (
-    echo ERREUR : le build du client a echoue.
+    echo ERREUR : le build du jeu a echoue.
     pause & exit /b 1
 )
 
-echo Compression des fichiers du jeu dans game.zip...
+echo Build du desinstalleur (IonFall_Uninstall.exe)...
+python -m PyInstaller uninstall.spec --noconfirm
+if errorlevel 1 (
+    echo ERREUR : le build du desinstalleur a echoue.
+    pause & exit /b 1
+)
+
+echo Compression des fichiers dans game.zip...
 python make_zip.py
 if errorlevel 1 (
     echo ERREUR : la creation du zip a echoue.
@@ -29,8 +36,8 @@ if errorlevel 1 (
 
 echo.
 echo === Build complet ! ===
-echo Installeur pret : installer_output\IonFall_Installer_v*.exe
+echo Installeur pret : dist\IonFall_Setup.exe
 echo.
-echo Distribue uniquement ce fichier. Il contient tout le jeu.
+echo Distribue uniquement ce fichier. Il contient le jeu et le site web.
 echo.
 pause

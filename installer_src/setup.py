@@ -10,6 +10,9 @@ import tkinter as tk
 from tkinter import ttk, filedialog, messagebox
 
 APP_NAME = "IonFall"
+APP_VERSION = "1.0"
+APP_PUBLISHER = "IonFall Team"
+REG_PATH = r"Software\Microsoft\Windows\CurrentVersion\Uninstall\IonFall"
 DEFAULT_DIR = os.path.join(os.environ.get("LOCALAPPDATA", os.path.expanduser("~")), APP_NAME)
 
 
@@ -36,12 +39,13 @@ class Installer(tk.Tk):
         super().__init__()
         self.title(f"Installation de {APP_NAME}")
         self.resizable(False, False)
-        self.geometry("520x300")
+        self.geometry("520x340")
         self._center()
 
-        self.install_dir = tk.StringVar(value=DEFAULT_DIR)
-        self.desktop_cb  = tk.BooleanVar(value=True)
-        self.startmenu_cb = tk.BooleanVar(value=True)
+        self.install_dir   = tk.StringVar(value=DEFAULT_DIR)
+        self.desktop_cb    = tk.BooleanVar(value=True)
+        self.startmenu_cb  = tk.BooleanVar(value=True)
+        self.site_web_cb   = tk.BooleanVar(value=True)
 
         self._build()
 
@@ -49,7 +53,7 @@ class Installer(tk.Tk):
         self.update_idletasks()
         sw, sh = self.winfo_screenwidth(), self.winfo_screenheight()
         x = (sw - 520) // 2
-        y = (sh - 300) // 2
+        y = (sh - 340) // 2
         self.geometry(f"+{x}+{y}")
 
     def _build(self):
@@ -66,8 +70,9 @@ class Installer(tk.Tk):
         # --- Options ---
         opt = tk.Frame(self)
         opt.pack(fill="x", padx=self.PAD, pady=4)
-        tk.Checkbutton(opt, text="Raccourci sur le Bureau",       variable=self.desktop_cb).pack(anchor="w")
-        tk.Checkbutton(opt, text="Raccourci dans le menu Demarrer", variable=self.startmenu_cb).pack(anchor="w")
+        tk.Checkbutton(opt, text="Raccourci sur le Bureau",           variable=self.desktop_cb).pack(anchor="w")
+        tk.Checkbutton(opt, text="Raccourci dans le menu Demarrer",   variable=self.startmenu_cb).pack(anchor="w")
+        tk.Checkbutton(opt, text="Installer le site web du projet",   variable=self.site_web_cb).pack(anchor="w")
 
         # --- Barre de progression ---
         self.progress = ttk.Progressbar(self, length=480, mode="determinate")
@@ -92,6 +97,21 @@ class Installer(tk.Tk):
         self.status.config(text=text)
         self.update()
 
+    def _write_registry(self, dest: str, game_exe: str, uninstall_exe: str) -> None:
+        try:
+            import winreg
+            with winreg.CreateKey(winreg.HKEY_CURRENT_USER, REG_PATH) as key:
+                winreg.SetValueEx(key, "DisplayName",     0, winreg.REG_SZ,    APP_NAME)
+                winreg.SetValueEx(key, "DisplayVersion",  0, winreg.REG_SZ,    APP_VERSION)
+                winreg.SetValueEx(key, "Publisher",       0, winreg.REG_SZ,    APP_PUBLISHER)
+                winreg.SetValueEx(key, "InstallLocation", 0, winreg.REG_SZ,    dest)
+                winreg.SetValueEx(key, "UninstallString", 0, winreg.REG_SZ,    uninstall_exe)
+                winreg.SetValueEx(key, "DisplayIcon",     0, winreg.REG_SZ,    game_exe)
+                winreg.SetValueEx(key, "NoModify",        0, winreg.REG_DWORD, 1)
+                winreg.SetValueEx(key, "NoRepair",        0, winreg.REG_DWORD, 1)
+        except Exception:
+            pass
+
     def _install(self):
         self.btn_install.config(state="disabled")
         dest = self.install_dir.get().strip()
@@ -107,40 +127,53 @@ class Installer(tk.Tk):
             self.btn_install.config(state="normal")
             return
 
-        # --- Extraction ---
+        install_site_web = self.site_web_cb.get()
+
+        # --- Extraction (filtre site_web si non demande) ---
         zip_path = resource("game.zip")
         self._set_status("Extraction des fichiers...", 0)
         try:
             with zipfile.ZipFile(zip_path) as zf:
                 members = zf.namelist()
-                n = len(members)
-                for i, member in enumerate(members):
+                to_extract = [
+                    m for m in members
+                    if install_site_web or not m.startswith("site_web/")
+                ]
+                n = len(to_extract)
+                for i, member in enumerate(to_extract):
                     zf.extract(member, dest)
-                    self._set_status(f"Extraction : {member[:55]}", (i + 1) / n * 85)
+                    self._set_status(f"Extraction : {member[:55]}", (i + 1) / n * 75)
         except Exception as e:
             messagebox.showerror("Erreur d'extraction", str(e))
             self.btn_install.config(state="normal")
             return
 
-        game_exe   = os.path.join(dest, "IonFall.exe")
-        server_exe = os.path.join(dest, "serveur", "IonFall_Serveur.exe")
+        game_exe      = os.path.join(dest, "IonFall.exe")
+        uninstall_exe = os.path.join(dest, "IonFall_Uninstall.exe")
+
+        # --- Enregistrement Windows (Parametres > Applications) ---
+        self._set_status("Enregistrement dans Windows...", 80)
+        self._write_registry(dest, game_exe, uninstall_exe)
 
         # --- Raccourci Bureau ---
         if self.desktop_cb.get():
-            self._set_status("Creation du raccourci Bureau...", 90)
+            self._set_status("Creation du raccourci Bureau...", 85)
             desktop = os.path.join(os.path.expanduser("~"), "Desktop")
             shortcut(game_exe, os.path.join(desktop, f"{APP_NAME}.lnk"), dest)
 
-        # --- Raccourci Menu Demarrer ---
+        # --- Raccourcis Menu Demarrer ---
         if self.startmenu_cb.get():
-            self._set_status("Creation du raccourci Menu Demarrer...", 95)
+            self._set_status("Creation du raccourci Menu Demarrer...", 90)
             sm_dir = os.path.join(
                 os.environ.get("APPDATA", ""),
                 "Microsoft", "Windows", "Start Menu", "Programs", APP_NAME,
             )
             os.makedirs(sm_dir, exist_ok=True)
-            shortcut(game_exe,   os.path.join(sm_dir, f"{APP_NAME}.lnk"),          dest)
-            shortcut(server_exe, os.path.join(sm_dir, f"{APP_NAME} - Serveur.lnk"), dest)
+            shortcut(game_exe,      os.path.join(sm_dir, f"{APP_NAME}.lnk"),              dest)
+            shortcut(uninstall_exe, os.path.join(sm_dir, f"Desinstaller {APP_NAME}.lnk"), dest)
+            if install_site_web:
+                site_index = os.path.join(dest, "site_web", "Page_accueil.html")
+                shortcut(site_index, os.path.join(sm_dir, f"{APP_NAME} - Site web.lnk"),  dest)
 
         self._set_status("Installation terminee !", 100)
         if messagebox.askyesno(
