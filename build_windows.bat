@@ -7,14 +7,14 @@ pip install pygame==2.6.1 PyTMX==3.32 pyinstaller
 echo.
 
 echo Build du client (IonFall.exe)...
-pyinstaller IonFall.spec --noconfirm
+python -m PyInstaller IonFall.spec --noconfirm
 if errorlevel 1 (
     echo ERREUR : le build du client a echoue.
     pause & exit /b 1
 )
 
 echo Build du serveur (IonFall_Serveur.exe)...
-pyinstaller serveur.spec --noconfirm
+python -m PyInstaller serveur.spec --noconfirm
 if errorlevel 1 (
     echo ERREUR : le build du serveur a echoue.
     pause & exit /b 1
@@ -28,7 +28,7 @@ if errorlevel 1 (
 )
 
 echo Build de l'installeur (IonFall_Setup.exe)...
-pyinstaller setup.spec --noconfirm
+python -m PyInstaller setup.spec --noconfirm
 if errorlevel 1 (
     echo ERREUR : le build de l'installeur a echoue.
     pause & exit /b 1
