@@ -47,6 +47,13 @@ class Installer(tk.Tk):
         self.startmenu_cb  = tk.BooleanVar(value=True)
         self.site_web_cb   = tk.BooleanVar(value=True)
 
+        try:
+            icon = tk.PhotoImage(file=resource("IonFall_48x48.png"))
+            self.iconphoto(True, icon)
+            self._icon = icon
+        except Exception:
+            pass
+
         self._build()
 
     def _center(self):

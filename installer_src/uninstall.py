@@ -10,6 +10,11 @@ APP_NAME = "IonFall"
 REG_PATH = r"Software\Microsoft\Windows\CurrentVersion\Uninstall\IonFall"
 
 
+def resource(rel: str) -> str:
+    base = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
+    return os.path.join(base, rel)
+
+
 def _install_dir() -> str:
     if getattr(sys, "frozen", False):
         return os.path.dirname(sys.executable)
@@ -44,6 +49,13 @@ def main() -> None:
     root = tk.Tk()
     root.withdraw()
 
+    try:
+        icon = tk.PhotoImage(file=resource("IonFall_48x48.png"))
+        root.iconphoto(True, icon)
+        root._icon = icon
+    except Exception:
+        pass
+
     if not messagebox.askyesno(
         f"Desinstaller {APP_NAME}",
         f"Voulez-vous vraiment desinstaller {APP_NAME} ?\n\n"
@@ -56,11 +68,18 @@ def main() -> None:
     _remove_registry()
     _remove_shortcuts()
 
-    # Supprimer le dossier via PowerShell avec delai pour que l'exe puisse se fermer
-    ps_cmd = f'Start-Sleep -Seconds 2; Remove-Item -Recurse -Force "{install_dir}"'
+    # Suppression du dossier via cmd.exe avec delai (plus fiable que PowerShell)
+    # del /f /q marque l'exe verrouille pour suppression a la fermeture du handle
+    # rd /s /q supprime le reste du dossier
+    uninstall_exe = os.path.join(install_dir, "IonFall_Uninstall.exe")
+    cmd_str = (
+        f"timeout /t 3 /nobreak >nul"
+        f" & del /f /q \"{uninstall_exe}\""
+        f" & rd /s /q \"{install_dir}\""
+    )
     subprocess.Popen(
-        ["powershell", "-NoProfile", "-WindowStyle", "Hidden", "-Command", ps_cmd],
-        creationflags=0x00000008,  # DETACHED_PROCESS
+        ["cmd", "/c", cmd_str],
+        creationflags=0x00000208,  # DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP
     )
 
     messagebox.showinfo(f"Desinstaller {APP_NAME}", f"{APP_NAME} a ete desinstalle avec succes.")

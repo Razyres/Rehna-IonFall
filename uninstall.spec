@@ -5,7 +5,7 @@ a = Analysis(
     ['installer_src/uninstall.py'],
     pathex=['.'],
     binaries=[],
-    datas=[],
+    datas=[('site_web/images/IonFall_48x48.png', '.')],
     hiddenimports=['tkinter', 'tkinter.messagebox'],
     hookspath=[],
     hooksconfig={},

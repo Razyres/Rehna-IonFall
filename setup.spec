@@ -6,7 +6,10 @@ a = Analysis(
     ['installer_src/setup.py'],
     pathex=['.'],
     binaries=[],
-    datas=[('installer_src/game.zip', '.')],
+    datas=[
+        ('installer_src/game.zip', '.'),
+        ('site_web/images/IonFall_48x48.png', '.'),
+    ],
     hiddenimports=['tkinter', 'tkinter.ttk', 'tkinter.filedialog', 'tkinter.messagebox'],
     hookspath=[],
     hooksconfig={},
