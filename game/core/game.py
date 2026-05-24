@@ -306,10 +306,15 @@ class Game:
                             break
                 continue
 
-            # Collision → minion enemies (enemy team only, local damage)
+            # Collision → minion enemies (enemy team only)
+            # Player 0 applies damage locally (minion authority).
+            # Player 1 relays hit to server so player 0 can apply it authoritatively.
             for enemy in list(self.enemies):
                 if getattr(enemy, 'team', '') != proj.team and proj.rect.colliderect(enemy.rect):
-                    enemy.take_damage(proj.damage)
+                    if self.my_id == 0:
+                        enemy.take_damage(proj.damage)
+                    else:
+                        hits_this_frame.append({"minion_id": enemy.minion_id, "damage": proj.damage})
                     proj.alive = False
                     break
             # Collision → remote champion : report hit to server
@@ -554,6 +559,16 @@ class Game:
                     if mid not in received_ids:
                         self._remote_minions[mid].alive = False
                         del self._remote_minions[mid]
+
+            # Player 0: apply minion hits reported by player 1
+            if self.my_id == 0:
+                for mhit in server_state.get("minion_hits", []):
+                    mid = mhit.get("minion_id")
+                    dmg = mhit.get("damage", 0)
+                    for e in list(self.all_sprites):
+                        if isinstance(e, Minion) and e.minion_id == mid:
+                            e.take_damage(dmg)
+                            break
 
             # Sync tower HP from server
             for _tkey, _tower in [

@@ -33,6 +33,7 @@ game_state = {
     "tower_red_2_hp": 500,
     "projectiles": [],
     "minions": [],
+    "minion_hits": [],
     "ready": False,
 }
 
@@ -97,10 +98,11 @@ def threaded_client(conn, player_id):
                     if player_id == 0 and "minion_states" in inputs:
                         game_state["minions"] = inputs["minion_states"]
 
-                    # Hit events (players + nexuses)
+                    # Hit events (players + nexuses + minions)
                     for hit in inputs.get("hits", []):
                         target = hit.get("target")
                         target_id = hit.get("target_id")
+                        minion_id = hit.get("minion_id")
                         dmg = hit.get("damage", 0)
                         if target == "nexus_r":
                             game_state["nexus_r_hp"] = max(0, game_state["nexus_r_hp"] - dmg)
@@ -112,8 +114,12 @@ def threaded_client(conn, player_id):
                             tk = f"player_{target_id}"
                             if tk in game_state:
                                 game_state[tk]["hp"] = max(0, game_state[tk]["hp"] - dmg)
+                        elif minion_id is not None:
+                            game_state["minion_hits"].append({"minion_id": minion_id, "damage": dmg})
 
                 serialized = pickle.dumps(game_state)
+                if player_id == 0:
+                    game_state["minion_hits"] = []
 
             conn.sendall(serialized)
 

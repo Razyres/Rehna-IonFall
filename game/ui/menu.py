@@ -19,7 +19,7 @@ class Menu:
     """
     Manages the character selection screen and initialization parameters before match starts.
     """
-    CHAMPIONS: List[str] = ["Freud", "Ordinateur", "Vagabon"]
+    CHAMPIONS: List[str] = ["Freud", "Pretresse", "Ordinateur", "Vagabon"]
     
     def __init__(self, screen: pygame.Surface):
         self.screen: pygame.Surface = screen
