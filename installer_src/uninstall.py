@@ -3,6 +3,7 @@ import os
 import sys
 import shutil
 import subprocess
+import tempfile
 import tkinter as tk
 from tkinter import messagebox
 
@@ -45,16 +46,33 @@ def _remove_shortcuts() -> None:
             pass
 
 
+def _schedule_deletion(install_dir: str) -> None:
+    # On ecrit un .bat dans %TEMP% pour supprimer le dossier apres la fermeture de l'exe.
+    # CREATE_NO_WINDOW est necessaire pour cmd.exe — DETACHED_PROCESS est incompatible.
+    bat = os.path.join(tempfile.gettempdir(), "ionfall_cleanup.bat")
+    with open(bat, "w") as f:
+        f.write("@echo off\r\n")
+        f.write("timeout /t 3 /nobreak >nul\r\n")
+        f.write(f"rd /s /q \"{install_dir}\"\r\n")
+        f.write("del /f /q \"%~f0\"\r\n")  # auto-suppression du .bat
+    subprocess.Popen(
+        ["cmd", "/c", bat],
+        creationflags=0x08000200,  # CREATE_NO_WINDOW | CREATE_NEW_PROCESS_GROUP
+    )
+
+
 def main() -> None:
     root = tk.Tk()
-    root.withdraw()
 
+    # Icone AVANT withdraw() pour qu'elle soit heritee par les fenetres de dialogue
     try:
         icon = tk.PhotoImage(file=resource("IonFall_48x48.png"))
         root.iconphoto(True, icon)
         root._icon = icon
     except Exception:
         pass
+
+    root.withdraw()
 
     if not messagebox.askyesno(
         f"Desinstaller {APP_NAME}",
@@ -67,20 +85,7 @@ def main() -> None:
     install_dir = _install_dir()
     _remove_registry()
     _remove_shortcuts()
-
-    # Suppression du dossier via cmd.exe avec delai (plus fiable que PowerShell)
-    # del /f /q marque l'exe verrouille pour suppression a la fermeture du handle
-    # rd /s /q supprime le reste du dossier
-    uninstall_exe = os.path.join(install_dir, "IonFall_Uninstall.exe")
-    cmd_str = (
-        f"timeout /t 3 /nobreak >nul"
-        f" & del /f /q \"{uninstall_exe}\""
-        f" & rd /s /q \"{install_dir}\""
-    )
-    subprocess.Popen(
-        ["cmd", "/c", cmd_str],
-        creationflags=0x00000208,  # DETACHED_PROCESS | CREATE_NEW_PROCESS_GROUP
-    )
+    _schedule_deletion(install_dir)
 
     messagebox.showinfo(f"Desinstaller {APP_NAME}", f"{APP_NAME} a ete desinstalle avec succes.")
     root.destroy()

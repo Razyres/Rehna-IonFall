@@ -47,10 +47,10 @@ class Installer(tk.Tk):
         self.startmenu_cb  = tk.BooleanVar(value=True)
         self.site_web_cb   = tk.BooleanVar(value=True)
 
+        # Icone avant tout affichage pour qu'elle apparaisse des l'ouverture
         try:
-            icon = tk.PhotoImage(file=resource("IonFall_48x48.png"))
-            self.iconphoto(True, icon)
-            self._icon = icon
+            self._icon = tk.PhotoImage(file=resource("IonFall_48x48.png"))
+            self.iconphoto(True, self._icon)
         except Exception:
             pass
 
