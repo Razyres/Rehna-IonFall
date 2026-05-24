@@ -3,20 +3,13 @@ echo === IonFall - Build Windows ===
 echo.
 
 echo Installation des dependances...
-pip install pygame==2.6.1 PyTMX==3.32 pyinstaller
+python -m pip install "pygame>=2.6.1" PyTMX==3.32 pyinstaller
 echo.
 
 echo Build du client (IonFall.exe)...
 python -m PyInstaller IonFall.spec --noconfirm
 if errorlevel 1 (
     echo ERREUR : le build du client a echoue.
-    pause & exit /b 1
-)
-
-echo Build du serveur (IonFall_Serveur.exe)...
-python -m PyInstaller serveur.spec --noconfirm
-if errorlevel 1 (
-    echo ERREUR : le build du serveur a echoue.
     pause & exit /b 1
 )
 
@@ -27,16 +20,16 @@ if errorlevel 1 (
     pause & exit /b 1
 )
 
-echo Build de l'installeur (IonFall_Setup.exe)...
+echo Build de l installeur (IonFall_Setup.exe)...
 python -m PyInstaller setup.spec --noconfirm
 if errorlevel 1 (
-    echo ERREUR : le build de l'installeur a echoue.
+    echo ERREUR : le build de l installeur a echoue.
     pause & exit /b 1
 )
 
 echo.
 echo === Build complet ! ===
-echo Installeur pret : dist\IonFall_Setup.exe
+echo Installeur pret : installer_output\IonFall_Installer_v*.exe
 echo.
 echo Distribue uniquement ce fichier. Il contient tout le jeu.
 echo.
