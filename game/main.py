@@ -54,7 +54,7 @@ def main() -> None:
         if is_host:
             server_proc = multiprocessing.Process(target=_server_process, daemon=True)
             server_proc.start()
-            time.sleep(0.8)  # Give the server time to bind the port
+            time.sleep(1.2)  # Give the server time to bind the port
 
         config = CHAMPIONS_CONFIG[chosen_champion]
 
@@ -81,6 +81,9 @@ def main() -> None:
         if server_proc is not None and server_proc.is_alive():
             server_proc.terminate()
             server_proc.join(timeout=2)
+            if server_proc.is_alive():
+                server_proc.kill()
+                server_proc.join(timeout=1)
             server_proc = None
 
         if game_outcome == "QUIT":
