@@ -10,12 +10,12 @@ sys.path.insert(0, str(root_dir))
 from game.core.game import Game
 from game.ui.menu import Menu
 from game.entities.champion import Champion
-from game.combat.ability import make_heal, make_heavy_shot, make_dash, make_curse
+from game.combat.ability import make_heal, make_heavy_shot, make_dash, make_burst, make_curse
 
 CHAMPIONS_CONFIG = {
     "Freud":      {"sprite_prefix": "Freud",      "speed": 5, "hp": 110},
     "Ordinateur": {"sprite_prefix": "0RD1N4T3UR", "speed": 5, "hp": 100},
-    "Pretresse":  {"sprite_prefix": "pretresse",  "speed": 5, "hp": 120},
+    "Pretresse":  {"sprite_prefix": "Pretresse",  "speed": 5, "hp": 120},
     "Vagabon":    {"sprite_prefix": "Vagabon",    "speed": 5, "hp": 100},
 }
 
