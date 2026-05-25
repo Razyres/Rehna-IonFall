@@ -18,10 +18,9 @@ a = Analysis(
     runtime_hooks=[],
     excludes=[
         'numpy', 'scipy', 'matplotlib', 'pandas',
-        'tkinter', 'sqlite3', 'ssl', 'unittest',
-        'email', 'html', 'http', 'urllib', 'pydoc',
-        'doctest', 'difflib', 'logging', 'asyncio',
-        'distutils', 'curses', 'multiprocessing.managers',
+        'tkinter', 'sqlite3', 'unittest',
+        'doctest', 'asyncio', 'curses',
+        'multiprocessing.managers',
     ],
     win_no_prefer_redirects=False,
     win_private_assemblies=False,
