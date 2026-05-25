@@ -1,4 +1,5 @@
 import pygame
+import socket
 from typing import List, Dict, Optional, Tuple
 from .button import Button
 from game.utils import resource_path
@@ -180,6 +181,59 @@ class Menu:
 
         pygame.display.flip()
 
+    @staticmethod
+    def _get_local_ip() -> str:
+        try:
+            s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            s.connect(("8.8.8.8", 80))
+            ip = s.getsockname()[0]
+            s.close()
+            return ip
+        except Exception:
+            return "127.0.0.1"
+
+    def _draw_host_info(self, ip: str, start_btn: Button) -> None:
+        self.screen.fill(BACKGROUND)
+        sw, sh = self.screen.get_width(), self.screen.get_height()
+
+        title = self.font_title.render("HEBERGER UNE PARTIE", True, ACCENT_PURPLE)
+        self.screen.blit(title, title.get_rect(centerx=sw // 2, y=80))
+
+        label = self.font.render("Donnez cette IP à l'autre joueur :", True, TEXT_COLOR)
+        self.screen.blit(label, label.get_rect(centerx=sw // 2, y=sh // 2 - 90))
+
+        box_rect = pygame.Rect(sw // 2 - 220, sh // 2 - 50, 440, 70)
+        pygame.draw.rect(self.screen, BUTTON_COLOR, box_rect, border_radius=8)
+        pygame.draw.rect(self.screen, ACCENT_CYAN, box_rect, 2, border_radius=8)
+        ip_surf = self.font_title.render(ip, True, ACCENT_CYAN)
+        self.screen.blit(ip_surf, ip_surf.get_rect(center=box_rect.center))
+
+        start_btn.draw(self.screen)
+
+        hint = self.font_small.render("ECHAP pour retour", True, (120, 120, 160))
+        self.screen.blit(hint, hint.get_rect(centerx=sw // 2, y=sh - 100))
+        pygame.display.flip()
+
+    def _run_host_info(self) -> bool:
+        """Shows the host's local IP. Returns True to proceed, False to go back."""
+        ip = self._get_local_ip()
+        sw, sh = self.screen.get_width(), self.screen.get_height()
+        start_btn = Button(sw // 2 - 160, sh // 2 + 60, 320, 55, "LANCER", BUTTON_PLAY, BUTTON_PLAY_HOVER)
+        while True:
+            self.clock.tick(60)
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    return False
+                elif event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_ESCAPE:
+                        return False
+                    elif event.key in (pygame.K_RETURN, pygame.K_KP_ENTER):
+                        return True
+                elif event.type == pygame.MOUSEBUTTONDOWN:
+                    if start_btn.is_clicked(event):
+                        return True
+            self._draw_host_info(ip, start_btn)
+
     def _run_mode_select(self) -> Optional[str]:
         """Returns 'host', 'join', or None (back to champion select)."""
         sw, sh = self.screen.get_width(), self.screen.get_height()
@@ -195,7 +249,8 @@ class Menu:
                         return None
                 elif event.type == pygame.MOUSEBUTTONDOWN:
                     if host_btn.is_clicked(event):
-                        return "host"
+                        if self._run_host_info():
+                            return "host"
                     if join_btn.is_clicked(event):
                         return "join"
             self._draw_mode_select(host_btn, join_btn)
