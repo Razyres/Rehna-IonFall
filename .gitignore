@@ -24,3 +24,5 @@ Thumbs.db
 dist/
 build/
 *.egg-info/
+*.exe
+installer_src/game.zip
